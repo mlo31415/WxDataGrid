@@ -10,6 +10,23 @@ from HelpersPackage import IsInt
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 from Log import Log
 
+#================================================================
+@dataclass
+class ColDefinition:
+    Name: str
+    Width: int=100
+    Type: str=""
+    IsEditable: str="yes"
+    preferred: str=""
+
+    @property
+    def Preferred(self) -> str:
+        if self.preferred != "":
+            return self.preferred
+        return self.Name
+
+
+#================================================================
 @dataclass(frozen=True)
 class Color:
      # Define some RGB color constants
@@ -63,23 +80,12 @@ class GridDataSource():
 
     @property
     @abstractmethod
+    def ColDefs(self) -> list[ColDefinition]:
+        return []
+
+    @property
     def ColHeaders(self) -> list[str]:
-        return []
-
-    @property
-    @abstractmethod
-    def ColDataTypes(self) -> list[str]:
-        return []
-
-    @property
-    @abstractmethod
-    def ColMinWidths(self) -> list[int]:
-        return []
-
-    @property
-    @abstractmethod
-    def ColEditable(self) -> list[int]:
-        return []
+        return [l.Name for l in self.ColDefs]
 
     @property
     def AllowCellEdits(self) -> list[tuple[int, int]]:
@@ -90,7 +96,7 @@ class GridDataSource():
 
     @property
     def NumCols(self) -> int:
-        return len(self.ColHeaders)
+        return len(self.ColDefs)
 
     @property
     @abstractmethod
@@ -166,7 +172,7 @@ class DataGrid():
         for irow, row in enumerate(self._datasource.Rows):
             if row.IsTextRow or row.IsLinkRow:
                 for icol in range(self.NumCols):
-                    if self._datasource.ColEditable[icol] == "maybe":
+                    if self._datasource.ColDefs[icol].IsEditable == "maybe":
                         self.AllowCellEdit(irow, icol)
 
 
@@ -245,8 +251,8 @@ class DataGrid():
     def InsertEmptyRows(self, irow: int, nrows: int) -> None:        # Grid
         self._grid.InsertRows(irow, nrows)  # Expand the grid
         # Append nrows at the end, them move the displaced rows to later
-        oldnumrows=self._datasource.NumRows
-        self._datasource.Rows.extend([self._datasource.Element() for _ in range(nrows)])
+        oldnumrows=self.Datasource.NumRows
+        self.Datasource.Rows.extend([self.Datasource.Element() for _ in range(nrows)])
         self.MoveRows(irow, oldnumrows-irow, irow+nrows)
 
         # Now update the editable status of non-editable columns
@@ -280,25 +286,26 @@ class DataGrid():
     def AppendEmptyCols(self, ncols: int) -> None:        # Grid
         self._grid.AppendCols(ncols)
 
+
     # --------------------------------------------------------
-    def SetColHeaders(self, headers: list[str]) -> None:        # Grid
-        self.NumCols=len(headers)
-        if len(headers) == self.NumCols:
+    def SetColHeaders(self, coldefs: list[ColDefinition]) -> None:        # Grid
+        self.NumCols=len(coldefs)
+        if len(coldefs) == self.NumCols:
             # Add the column headers
             iCol=0
-            for colhead in headers:
-                self._grid.SetColLabelValue(iCol, colhead)
+            for cd in coldefs:
+                self._grid.SetColLabelValue(iCol, cd.Preferred)
                 iCol+=1
 
     # --------------------------------------------------------
     def AutoSizeColumns(self):        # Grid
         self._grid.AutoSizeColumns()
-        if len(self._datasource.ColMinWidths) == self._grid.NumberCols-1:
+        if len(self._datasource.ColDefs) == self._grid.NumberCols-1:
             iCol=0
-            for width in self._datasource.ColMinWidths:
+            for cd in self._datasource.ColDefs:
                 w=self._grid.GetColSize(iCol)
-                if w < width:
-                    self._grid.SetColSize(iCol, width)
+                if w < cd.Width:
+                    self._grid.SetColSize(iCol, cd.Width)
                 iCol+=1
 
     # --------------------------------------------------------
@@ -312,7 +319,7 @@ class DataGrid():
         self.SetCellBackgroundColor(irow, icol, Color.White)
 
         # Deal with col overflow
-        if icol >= len(self._datasource.ColHeaders):
+        if icol >= len(self._datasource.ColDefs):
             return
 
         # Row overflow is permitted and extra rows (rows in the grid, but not in the datasource) are colored generically
@@ -320,7 +327,7 @@ class DataGrid():
             # These are trailing rows and should get default formatting
             self._grid.SetCellSize(irow, icol, 1, 1)  # Eliminate any spans
             self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
-            if self._datasource.ColEditable[icol] == "no" or self._datasource.ColEditable[icol] == "maybe":
+            if self._datasource.ColDefs[icol].IsEditable == "no" or self._datasource.ColDefs[icol].IsEditable == "maybe":
                 self.SetCellBackgroundColor(irow, icol, Color.LightGray)
             return
 
@@ -349,26 +356,26 @@ class DataGrid():
                 self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
 
         # If the column is not editable, color it light gray regardless of its value
-        elif self._datasource.ColEditable[icol] == "no":
+        elif self._datasource.ColDefs[icol].IsEditable == "no":
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
-        elif self._datasource.ColEditable[icol] == "maybe" and (irow, icol) not in self._datasource.AllowCellEdits:
+        elif self._datasource.ColDefs[icol].IsEditable == "maybe" and (irow, icol) not in self._datasource.AllowCellEdits:
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
 
         else:
             # If it *is* editable or potentially editable, then color it according to its value
             # We skip testing for "str"-type columns since anything at all is OK in a str column
-            if self._datasource.ColDataTypes[icol] == "int":
+            if self._datasource.ColDefs[icol].Type == "int":
                 if val is not None and val != "" and not IsInt(val):
                     self.SetCellBackgroundColor(irow, icol, Color.Pink)
-            elif self._datasource.ColDataTypes[icol] == "date range":
+            elif self._datasource.ColDefs[icol].Type == "date range":
                 if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
                     self.SetCellBackgroundColor(irow, icol, Color.Pink)
-            elif self._datasource.ColDataTypes[icol] == "date":
+            elif self._datasource.ColDefs[icol].Type == "date":
                 if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
                     self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
         # Special handling for URLs: we add an underline and paint the text blue
-        if self._datasource.ColDataTypes[icol] == "url":
+        if self._datasource.ColDefs[icol].Type == "url":
             font=self._grid.GetCellFont(irow, icol)
             if val is not None and val != "" and len(self._datasource.Rows[irow].URL) > 0:
                 self._grid.SetCellTextColour(irow, icol, Color.Blue)
@@ -415,7 +422,7 @@ class DataGrid():
         #     self._grid.AppendRows(self._grid.NumberRows-self._datasource.NumRows)
         #     #TODO: Need to decide if we're going to leave any empty rows
 
-        self.SetColHeaders(self._datasource.ColHeaders)
+        self.SetColHeaders(self._datasource.ColDefs)
 
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
@@ -433,7 +440,7 @@ class DataGrid():
             else:
                 self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
-            for icol in range(len(self._datasource.ColHeaders)):
+            for icol in range(len(self._datasource.ColDefs)):
                 self.SetCellValue(irow, icol, self._datasource.GetData(irow, icol))
 
         self.ColorCellsByValue()
@@ -534,10 +541,10 @@ class DataGrid():
             self._datasource.Rows.append(self._datasource.Element())
 
         # Many data sources do not allow expanding the number of columns, so check that first
-        assert icol < len(self._datasource.ColHeaders) or self._datasource.CanAddColumns
+        assert icol < len(self._datasource.ColDefs) or self._datasource.CanAddColumns
         if self._datasource.CanAddColumns:
-            while icol >= len(self._datasource.ColHeaders):
-                self._datasource.ColHeaders.append("")
+            while icol >= len(self._datasource.ColDefs):
+                self._datasource.ColDefs.append(ColDefinition())
                 for j in range(self._datasource.NumRows):
                     self._datasource.Rows[j].append("")
 
@@ -564,10 +571,10 @@ class DataGrid():
     def OnGridEditorShown(self, event):
         irow=event.GetRow()
         icol=event.GetCol()
-        if self.Datasource.ColEditable[icol] == "no":
+        if self.Datasource.ColDefs[icol].IsEditable == "no":
             event.Veto()
             return
-        if self.Datasource.ColEditable[icol] == "maybe":
+        if self.Datasource.ColDefs[icol].IsEditable == "maybe":
             for it in self.Datasource.AllowCellEdits:
                 if (irow, icol) == it:
                     return
@@ -584,7 +591,7 @@ class DataGrid():
             mi.Enable(False)
 
         # Everything remains disabled when we're outside the defined columns
-        if self.clickedColumn > len(self._datasource.ColHeaders)+1:
+        if self.clickedColumn > len(self._datasource.ColDefs)+1:
             return
 
         # We enable the Copy item if have a selection
