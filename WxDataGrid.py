@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Union, Optional
 from dataclasses import dataclass
+from abc import abstractmethod
 
 import wx
 import wx.grid
@@ -21,12 +22,38 @@ class Color:
      White=wx.Colour(255, 255, 255)
      Black=wx.Colour(0, 0, 0)
 
+# An abstract class defining a row  of the GridDataSource
+class GridDataElement:
+
+    @abstractmethod
+    def Signature(self) -> int:
+        return 0
+
+    # Get or set a value by name or column number in the grid
+    @abstractmethod
+    def GetVal(self, icol: int) -> Union[str, int, bool]:
+        return 0
+
+    @abstractmethod
+    def SetVal(self, icol: int, val: Union[str, int, bool]) -> None:
+        pass
+
+    @property
+    def IsLinkRow(self) -> bool:
+        return False            # Override only if needed
+
+    @property
+    def IsTextRow(self) -> bool:
+        return False            # Override only if needed
+
+
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
-
     def __init__(self):
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
+        self._element: GridDataElement=None
 
+    @abstractmethod
     def Signature(self) -> int:
         return hash(self)
 
@@ -35,23 +62,23 @@ class GridDataSource():
         return self._element
 
     @property
+    @abstractmethod
     def ColHeaders(self) -> list[str]:
-        assert False    # Must be overridden in derived class
         return []
 
     @property
+    @abstractmethod
     def ColDataTypes(self) -> list[str]:
-        assert False    # Must be overridden in derived class
         return []
 
     @property
+    @abstractmethod
     def ColMinWidths(self) -> list[int]:
-        assert False    # Must be overridden in derived class
         return []
 
     @property
+    @abstractmethod
     def ColEditable(self) -> list[int]:
-        assert False    # Must be overridden in derived class
         return []
 
     @property
@@ -66,24 +93,27 @@ class GridDataSource():
         return len(self.ColHeaders)
 
     @property
+    @abstractmethod
     def NumRows(self) -> int:
         assert False
         return -1
 
+    @abstractmethod
     def GetData(self, iRow: int, iCol: int) -> str:
-        assert False
-        pass
+        return ""
 
     @property
+    @abstractmethod
     def Rows(self) -> list:     # Types of list elements needs to be undefined since we don't know what they will be.
         return []
     @Rows.setter
+    @abstractmethod
     def Rows(self, rows: list) -> None:
         assert False
         pass
 
+    @abstractmethod
     def SetDataVal(self, irow: int, icol: int, val: Union[int, str, FanzineDateRange]) -> None:
-        assert False
         pass
 
     @property
@@ -93,14 +123,6 @@ class GridDataSource():
     @property
     def CanEditColumnHeaders(self) -> bool:
         return False            # Override this if editing the column headers is allowed
-
-    @property
-    def IsLink(self, row: int) -> bool:
-        return False            # Override only if needed
-
-    @property
-    def IsText(self, row: int) -> bool:
-        return False            # Override only if needed
 
     @property
     def SpecialTextColor(self) -> Optional[Color]:
@@ -142,7 +164,7 @@ class DataGrid():
     # Make text lines to be merged and editable
     def MakeTextLinesEditable(self) -> None:
         for irow, row in enumerate(self._datasource.Rows):
-            if row.IsText or row.IsLink:
+            if row.IsTextRow or row.IsLinkRow:
                 for icol in range(self.NumCols):
                     if self._datasource.ColEditable[icol] == "maybe":
                         self.AllowCellEdit(irow, icol)
@@ -310,7 +332,7 @@ class DataGrid():
         self._grid.SetCellTextColour(irow, icol, Color.Black)
 
         # If the row is a text row and if there's a special text color, color it thus
-        if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsText and self._datasource.SpecialTextColor is not None:
+        if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow and self._datasource.SpecialTextColor is not None:
             if self._datasource.SpecialTextColor is not None:
                 if type(self._datasource.SpecialTextColor) is Color:
                     self.SetCellBackgroundColor(irow, icol, self._datasource.SpecialTextColor)
@@ -318,7 +340,7 @@ class DataGrid():
                     self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Bold())
 
         # If the row is a link row give it the look of a link
-        elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLink:
+        elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
             # Locate the "Display Name" column
             if not "Display Name" in self.Datasource.ColHeaders:
                 assert False  # This should never happen
@@ -397,10 +419,10 @@ class DataGrid():
 
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
-            if self._datasource.Rows[irow].IsText:
+            if self._datasource.Rows[irow].IsTextRow:
                 self._grid.SetCellSize(irow, 0, 1, self.NumCols)   # Make text rows all one cell
 
-            elif self._datasource.Rows[irow].IsLink:    # If a grid allows IsLink to be set, its Datasource must have a column labelled "Display Name"
+            elif self._datasource.Rows[irow].IsLinkRow:    # If a grid allows IsLink to be set, its Datasource must have a column labelled "Display Name"
                 # Locate the "Display Name" column
                 if not "Display Name" in self.Datasource.ColHeaders:
                     assert False  # This should never happen
