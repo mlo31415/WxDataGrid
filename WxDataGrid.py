@@ -582,12 +582,15 @@ class DataGrid():
 
 
     #------------------
-    def OnGridCellRightClick(self, event, m_menuPopup):        # Grid
+    # This records the column and row and disables all the popup menu items
+    # Then it enables copy and paste if appropriate.
+    # Further handling is the responsibility of the application which called it
+    def OnGridCellRightClick(self, event, m_GridPopup):        # Grid
         self.clickedColumn=event.GetCol()
         self.clickedRow=event.GetRow()
 
         # Set everything to disabled.
-        for mi in m_menuPopup.GetMenuItems():
+        for mi in m_GridPopup.GetMenuItems():
             mi.Enable(False)
 
         # Everything remains disabled when we're outside the defined columns
@@ -596,11 +599,11 @@ class DataGrid():
 
         # We enable the Copy item if have a selection
         if self.HasSelection():
-            mi=m_menuPopup.FindItemById(m_menuPopup.FindItem("Copy"))
+            mi=m_GridPopup.FindItemById(m_GridPopup.FindItem("Copy"))
             mi.Enable(True)
 
         # We enable the Paste popup menu item if there is something to paste
-        mi=m_menuPopup.FindItemById(m_menuPopup.FindItem("Paste"))
+        mi=m_GridPopup.FindItemById(m_GridPopup.FindItem("Paste"))
         mi.Enabled=self.clipboard is not None and len(self.clipboard) > 0 and len(self.clipboard[0]) > 0  # Enable only if the clipboard contains actual content
 
 
