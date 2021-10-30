@@ -94,6 +94,13 @@ class GridDataSource():
         self._allowCellEdits=val
 
     @property
+    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
+        return True
+    @abstractmethod
+    def DelCol(self, icol: int) -> None:
+        pass
+
+    @property
     def NumCols(self) -> int:
         return len(self.ColDefs)
 
