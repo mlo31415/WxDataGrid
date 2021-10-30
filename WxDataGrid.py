@@ -693,6 +693,7 @@ class DataGrid():
         event.Skip()
 
     #------------------
+    # Copy the selected cells into the clipboard object.
     def OnPopupCopy(self, event):        # Grid
         # We need to copy the selected cells into the clipboard object.
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
@@ -701,6 +702,7 @@ class DataGrid():
         event.Skip()
 
     #------------------
+    # Paste the cells on the clipboard into the grid at the click location
     def OnPopupPaste(self, event):        # Grid
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
