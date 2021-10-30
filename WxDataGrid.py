@@ -6,7 +6,8 @@ from abc import abstractmethod
 import wx
 import wx.grid
 
-from HelpersPackage import IsInt
+import HelpersPackage
+from HelpersPackage import IsInt, MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 from Log import Log
 
@@ -755,7 +756,11 @@ class DataGrid():
         event.Skip()
 
     def OnPopupRenameCol(self, event):
-        event.Skip()
+        v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
+        if v is not None:
+            icol=self.clickedColumn
+            self.Datasource.ColDefs[icol].Name=v
+            self.RefreshGridFromDatasource()
 
     def OnPopupInsertColLeft(self, event):
         event.Skip()
