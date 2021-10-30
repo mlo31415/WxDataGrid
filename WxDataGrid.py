@@ -67,7 +67,9 @@ class GridDataElement:
 
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
+
     def __init__(self):
+        self._colDefs: list[ColDefinition]=[]
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
         self._element: GridDataElement=None
 
@@ -79,9 +81,11 @@ class GridDataSource():
         return self._element
 
     @property
-    @abstractmethod
     def ColDefs(self) -> list[ColDefinition]:
-        pass
+        return self._colDefs
+    @ColDefs.setter
+    def ColDefs(self, cds: list[ColDefinition]):
+        self._colDefs=cds
 
     @property
     def ColHeaders(self) -> list[str]:
@@ -268,11 +272,10 @@ class DataGrid():
 
     # --------------------------------------------------------
     def DeleteRows(self, irow: int, numrows: int=1):        # Grid
-
         if irow >= self.Datasource.NumRows:
             return
-        numrows=min(numrows, self.Datasource.NumRows-irow)  # If the request goes beyond the end of the data, ignore the extras
 
+        numrows=min(numrows, self.Datasource.NumRows-irow)  # If the request goes beyond the end of the data, ignore the extras
         del self.Datasource.Rows[irow:irow+numrows]
 
         # We also need to drop entries in AllowCellEdits which refer to this row and adjust the indexes of ones referring to all later rows
@@ -295,12 +298,11 @@ class DataGrid():
     # --------------------------------------------------------
     def SetColHeaders(self, coldefs: list[ColDefinition]) -> None:        # Grid
         self.NumCols=len(coldefs)
-        if len(coldefs) == self.NumCols:
-            # Add the column headers
-            iCol=0
-            for cd in coldefs:
-                self._grid.SetColLabelValue(iCol, cd.Preferred)
-                iCol+=1
+        # Add the column headers
+        iCol=0
+        for cd in coldefs:
+            self._grid.SetColLabelValue(iCol, cd.Preferred)
+            iCol+=1
 
     # --------------------------------------------------------
     def AutoSizeColumns(self):        # Grid
@@ -763,7 +765,16 @@ class DataGrid():
             self.RefreshGridFromDatasource()
 
     def OnPopupInsertColLeft(self, event):
-        event.Skip()
+        v=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
+        if v is None or len(v.strip()) == 0:
+            event.Skip()
+            return
+
+        icol=self.clickedColumn
+        for row in self.Datasource.Rows:
+            row._cells=row._cells[:icol]+[""]+row._cells[icol:]
+        self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+[ColDefinition(v)]+self.Datasource.ColDefs[icol:]
+        self.RefreshGridFromDatasource()
 
     def OnPopupInsertColRight(self, event):
         event.Skip()
