@@ -74,7 +74,10 @@ class GridDataSource():
         self._element: GridDataElement=None
 
     def Signature(self) -> int:
-        return hash(self)
+        sum=0
+        for row in self.Rows:
+            sum+=row.Signature()
+        return sum
 
     @property
     def Element(self):
@@ -145,12 +148,6 @@ class GridDataSource():
     @SpecialTextColor.setter
     def SpecialTextColor(self, val: Optional[Color]) -> None:
         return
-
-    def Signature(self) -> int:
-        sum=0
-        for row in self.Rows:
-            sum+=1#row.Signature()
-        return sum
 
 
 ################################################################################
