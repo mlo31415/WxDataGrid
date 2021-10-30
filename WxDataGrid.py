@@ -585,6 +585,31 @@ class DataGrid():
             event.Veto()
 
 
+    def OnGridLabelRightClick(self, event, m_GridLabelPopup):
+        self.clickedColumn=event.GetCol()
+        self.clickedRow=event.GetRow()
+
+        if m_GridLabelPopup is None:
+            event.skip()
+
+        # Set everything to disabled.
+        for mi in m_GridLabelPopup.GetMenuItems():
+            mi.Enable(False)
+
+        # Everything remains disabled when we're outside the defined columns
+        if self.clickedColumn > len(self._datasource.ColDefs)+1:
+            return
+
+        # We enable the Copy item if have a selection
+        if self.HasSelection():
+            mi=m_GridLabelPopup.FindItemById(m_GridLabelPopup.FindItem("Copy"))
+            mi.Enable(True)
+
+        # We enable the Paste popup menu item if there is something to paste
+        mi=m_GridLabelPopup.FindItemById(m_GridLabelPopup.FindItem("Paste"))
+        mi.Enabled=self.clipboard is not None and len(self.clipboard) > 0 and len(self.clipboard[0]) > 0  # Enable only if the clipboard contains actual content
+
+
     #------------------
     # This records the column and row and disables all the popup menu items
     # Then it enables copy and paste if appropriate.
@@ -701,7 +726,6 @@ class DataGrid():
     #------------------
     # Copy the selected cells into the clipboard object.
     def OnPopupCopy(self, event):        # Grid
-        # We need to copy the selected cells into the clipboard object.
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
@@ -712,6 +736,34 @@ class DataGrid():
     def OnPopupPaste(self, event):        # Grid
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
+        event.Skip()
+
+    # Delete the selected columns
+    def OnPopupDelCol(self, event):
+        icol=self.clickedColumn
+        del self.Datasource.ColDefs[icol]
+        for i, row in enumerate(self.Datasource.Rows):
+            row.DelCol(icol)
+            self.Datasource.Rows[i]=row
+
+        self.RefreshGridFromDatasource()
+        event.Skip()
+
+    def OnPopupDelRow(self, event):
+        del self.Datasource.Rows[self.clickedRow:self.clickedRow+1]
+        self.RefreshGridFromDatasource()
+        event.Skip()
+
+    def OnPopupRenameCol(self, event):
+        event.Skip()
+
+    def OnPopupInsertColLeft(self, event):
+        event.Skip()
+
+    def OnPopupInsertColRight(self, event):
+        event.Skip()
+
+    def OnPopupExtractScanner(self, event):
         event.Skip()
 
     # ------------------
