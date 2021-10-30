@@ -764,20 +764,23 @@ class DataGrid():
             self.Datasource.ColDefs[icol].Name=v
             self.RefreshGridFromDatasource()
 
-    def OnPopupInsertColLeft(self, event):
+    def InsertColumn(self, event, offset: int) -> None:
         v=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
         if v is None or len(v.strip()) == 0:
             event.Skip()
             return
 
-        icol=self.clickedColumn
+        icol=self.clickedColumn+offset
         for row in self.Datasource.Rows:
             row._cells=row._cells[:icol]+[""]+row._cells[icol:]
         self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+[ColDefinition(v)]+self.Datasource.ColDefs[icol:]
         self.RefreshGridFromDatasource()
 
+    def OnPopupInsertColLeft(self, event):
+        self.InsertColumn(event, 0)
+
     def OnPopupInsertColRight(self, event):
-        event.Skip()
+        self.InsertColumn(event, 1)
 
     def OnPopupExtractScanner(self, event):
         event.Skip()
