@@ -115,12 +115,11 @@ class GridDataSource():
 
     @property
     @abstractmethod
-    def Rows(self) -> list:     # Types of list elements needs to be undefined since we don't know what they will be.
-        return []
+    def Rows(self) -> list[GridDataElement]:     # Types of list elements needs to be undefined since we don't know what they will be.
+        pass
     @Rows.setter
     @abstractmethod
-    def Rows(self, rows: list) -> None:
-        assert False
+    def Rows(self, rows: list[GridDataElement]) -> None:
         pass
 
     @abstractmethod
