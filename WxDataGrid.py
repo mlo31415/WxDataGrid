@@ -70,7 +70,6 @@ class GridDataSource():
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
         self._element: GridDataElement=None
 
-    @abstractmethod
     def Signature(self) -> int:
         return hash(self)
 
@@ -81,7 +80,7 @@ class GridDataSource():
     @property
     @abstractmethod
     def ColDefs(self) -> list[ColDefinition]:
-        return []
+        pass
 
     @property
     def ColHeaders(self) -> list[str]:
@@ -101,12 +100,11 @@ class GridDataSource():
     @property
     @abstractmethod
     def NumRows(self) -> int:
-        assert False
-        return -1
+        pass
 
     @abstractmethod
     def GetData(self, iRow: int, iCol: int) -> str:
-        return ""
+        pass
 
     @property
     @abstractmethod
