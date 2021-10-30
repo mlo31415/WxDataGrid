@@ -413,7 +413,7 @@ class DataGrid():
         return None
 
     # --------------------------------------------------------
-    def RefreshGridFromData(self):        # Grid
+    def RefreshGridFromDatasource(self):        # Grid
         self.EvtHandlerEnabled=False
         self._grid.ClearGrid()
         # if self._grid.NumberRows > self._datasource.NumRows:
@@ -531,7 +531,7 @@ class DataGrid():
         for i, row in enumerate(self.clipboard, start=pasteTop):
             for j, cellval in enumerate(row, start=pasteLeft):
                 self._datasource.SetDataVal(i, j, cellval)
-        self.RefreshGridFromData()
+        self.RefreshGridFromDatasource()
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
@@ -562,7 +562,7 @@ class DataGrid():
         self._datasource.SetDataVal(row, col, newVal)
         #Log("set datasource("+str(row)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
-        self.RefreshGridFromData()
+        self.RefreshGridFromDatasource()
         self.AutoSizeColumns()
         self.EvtHandlerEnabled=True
 
@@ -648,7 +648,7 @@ class DataGrid():
         elif event.KeyCode == 308:                  # cntl
             self.cntlDown=True
         elif event.KeyCode == 68:                   # Kludge to be able to force a refresh (press "d")
-            self.RefreshGridFromData()
+            self.RefreshGridFromDatasource()
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             tl=self._grid.SelectionBlockTopLeft
             br=self._grid.SelectionBlockBottomRight
@@ -666,7 +666,7 @@ class DataGrid():
                     top-=1
                     bottom-=1
                     self._grid.SelectBlock(top, left, bottom, right)
-                    self.RefreshGridFromData()
+                    self.RefreshGridFromDatasource()
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             tl=self._grid.SelectionBlockTopLeft
             br=self._grid.SelectionBlockBottomRight
@@ -684,7 +684,7 @@ class DataGrid():
                     top+=1
                     bottom+=1
                     self._grid.SelectBlock(top, left, bottom, right)
-                    self.RefreshGridFromData()
+                    self.RefreshGridFromDatasource()
         else:
             event.Skip()
 
