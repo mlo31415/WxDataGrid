@@ -41,7 +41,7 @@ class Color:
      Black=wx.Colour(0, 0, 0)
 
 # An abstract class defining a row  of the GridDataSource
-class GridDataElement:
+class GridDataRowClass:
 
     @abstractmethod
     def Signature(self) -> int:
@@ -71,7 +71,7 @@ class GridDataSource():
     def __init__(self):
         self._colDefs: list[ColDefinition]=[]
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
-        self._element: GridDataElement=None
+        self._gridDataRowClass: GridDataRowClass=None
 
     def Signature(self) -> int:
         sum=0
@@ -81,7 +81,7 @@ class GridDataSource():
 
     @property
     def Element(self):
-        return self._element
+        return self._gridDataRowClass
 
     @property
     def ColDefs(self) -> list[ColDefinition]:
@@ -123,11 +123,11 @@ class GridDataSource():
 
     @property
     @abstractmethod
-    def Rows(self) -> list[GridDataElement]:     # Types of list elements needs to be undefined since we don't know what they will be.
+    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.
         pass
     @Rows.setter
     @abstractmethod
-    def Rows(self, rows: list[GridDataElement]) -> None:
+    def Rows(self, rows: list[GridDataRowClass]) -> None:
         pass
 
     @abstractmethod
@@ -211,11 +211,11 @@ class DataGrid():
 
     # --------------------------------------------------------
     @property
-    # Get the number of columns
     def NumCols(self) -> int:
         return self._grid.NumberCols
     @NumCols.setter
-    # Get or set the number of columns
+    # Note that this actually changes the number of columns in the grid by adding or deleting from the end
+    # It does not change the ColDefs
     def NumCols(self, nCols: int) -> None:
         if self._grid.NumberCols == nCols:
             return
@@ -294,12 +294,10 @@ class DataGrid():
 
     # --------------------------------------------------------
     def SetColHeaders(self, coldefs: list[ColDefinition]) -> None:        # Grid
-        self.NumCols=len(coldefs)
+        self.NumCols=len(coldefs)   # If necessary, change the grid to match the ColDefs
         # Add the column headers
-        iCol=0
-        for cd in coldefs:
-            self._grid.SetColLabelValue(iCol, cd.Preferred)
-            iCol+=1
+        for i, cd in enumerate(coldefs):
+            self._grid.SetColLabelValue(i, cd.Preferred)
 
     # --------------------------------------------------------
     def AutoSizeColumns(self):        # Grid
