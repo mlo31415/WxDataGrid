@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional
+from typing import Union, Optional, Any
 from dataclasses import dataclass
 from abc import abstractmethod
 
@@ -489,7 +489,7 @@ class DataGrid():
         self._datasource.Rows=rows
 
         tpermuter=i1+i3+i2+i4
-        permuter=[None]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
+        permuter=[-1]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
         for i, r in enumerate(tpermuter):
             permuter[r]=i
 
@@ -502,6 +502,64 @@ class DataGrid():
             except:
                 pass
         Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+
+    #--------------------------------------------------------
+    # Move a block of rows within the data source
+    # All row numbers are logical
+    # Oldrow is the 1st row of the block to be moved
+    # Newrow is the target position to which oldrow is moved
+    def MoveCols(self, oldcol: int, numcols: int, newcol: int):        # Grid
+        rows=self._datasource.Rows
+
+        dest=newcol
+        start=oldcol
+        end=oldcol+numcols-1
+        print(f"MoveCols: {start=}  {end=}  {numcols=}  {dest=}")
+        if newcol < oldcol:
+            # Move earlier
+            i1=list(range(0, dest))
+            i2=list(range(dest, start))
+            i3=list(range(start, end+1))
+            i4=list(range(end+1, len(rows)))
+            print(f"{i1=}  {i2=}  {i3=}  {i4=}")
+        else:
+            # Move Later
+            i1=list(range(0, start))
+            i2=list(range(start, end+1))
+            i3=list(range(end+1, end+1+dest-start))
+            i4=list(range(end+1+dest-start, len(rows)))
+            print(f"{i1=}  {i2=}  {i3=}  {i4=}")
+
+        tpermuter: list[int]=i1+i3+i2+i4
+        permuter: list[int]=[-1]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
+        for i, r in enumerate(tpermuter):
+            permuter[r]=i
+
+        for row in rows:
+            temp=[-1]*self.NumCols
+            for i in range(self.NumCols):
+                temp[i]=row.GetVal(i)
+            for i in range(self.NumCols):
+                row.SetVal(permuter[i], temp[i])
+        Log("permuter: "+str(permuter))
+        Log("tpermuter: "+str(tpermuter))
+        Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+
+        # Move the column labels
+        temp: list[Any]=[None]*self.NumCols
+        for i in range(self.NumCols):
+            temp[i]=self.Datasource.ColDefs[i]
+        for i in range(self.NumCols):
+            self.Datasource.ColDefs[permuter[i]]=temp[i]
+
+        # Now use the permuter to update the row numbers of the cells which are allowed to be edited
+        for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
+            try:
+                self._datasource.AllowCellEdits[i]=(permuter[row], col)
+            except:
+                pass
+        Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+
 
     # ------------------
     def CopyCells(self, top: int, left: int, bottom: int, right: int) -> None:        # Grid
@@ -688,26 +746,24 @@ class DataGrid():
         for i in range(left+1, right+1):
             self._grid.SelectCol(i, addToSelected = True)
 
+    # Return a box which bounds all selections in the grid
     # Top, Left, Right, Bottom
     def SelectionBoundingBox(self) -> Optional[tuple[int, int, int, int]]:
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return None
         top=99999
         left=99999
-        for box in self._grid.SelectionBlockTopLeft:
-            t, l = box
+        for t, l in self._grid.SelectionBlockTopLeft:
             top=min(top, t)
             left=min(left, l)
         bottom=-1
         right=-1
-        for box in self._grid.SelectionBlockBottomRight:
-            b, r = box
+        for b, r in self._grid.SelectionBlockBottomRight:
             bottom=max(bottom, b)
             right=max(right, r)
 
+        print(f"SelectionBoundingBox{top=}  {left=}  {bottom=}  {right=}")
         return top, left, bottom, right
-
-
 
     # Take the existing selected cells and extend the selection to the full rows
     def ExtendRowSelection(self) -> tuple[int, int]:
@@ -718,11 +774,11 @@ class DataGrid():
         return top, bottom
 
     # Take the existing selected cells and extend the selection to the full columns
-    def ExtendColumnSelection(self) -> tuple[int, int]:
+    def ExtendColSelection(self) -> tuple[int, int]:
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return -1, -1
         _, left, _, right=self.SelectionBoundingBox()
-        self.SelectCols((left, right))
+        self.SelectCols(left, right)
         return left, right
 
     #-------------------
@@ -742,18 +798,36 @@ class DataGrid():
         elif event.KeyCode == 68:                   # Kludge to be able to force a refresh (press "d")
             self.RefreshGridFromDatasource()
 
+        elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
+            print("**move left")
+            left, right=self.ExtendColSelection()
+            if right != -1:   # There must be a selection
+                if left > 0: # Can move left only if the first col selected is not col 0
+                    self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
+                    self.SelectCols(left-1, right-1)
+                    self.RefreshGridFromDatasource()
+
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
             if top != -1:   # There must be a selection
-                if top > 0: # Can't move up if the first row selected is row 0
+                if top > 0:  # Can move up only if the first row selected is not row 0
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
+                    self.RefreshGridFromDatasource()
+
+        elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
+            print("**move right")
+            left, right=self.ExtendColSelection()
+            if right != -1:   # There must be a selection
+                if right < self._grid.NumberCols-1:    # Can move further right only if the rightmost col is not selected
+                    self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
+                    self.SelectCols(left+1, right+1)
                     self.RefreshGridFromDatasource()
 
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             top, bottom=self.ExtendRowSelection()
             if top != -1:   # There must be a selection
-                if bottom < self._grid.NumberRows:      # Can't move further down if the bottom row is selected
+                if bottom < self._grid.NumberRows-1:      # Can move further down only if the bottom row is not selected
                     self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
                     self.SelectRows(top+1, bottom+1)
                     self.RefreshGridFromDatasource()
