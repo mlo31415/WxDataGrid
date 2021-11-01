@@ -583,11 +583,16 @@ class DataGrid():
             event.Veto()
 
     # ------------------
-    def OnGridLabelLeftClick(self, event):
+    def OnGridLabelLeftClick(self, event, cntldown: bool):
         self.clickedColumn=event.GetCol()
         self.clickedRow=event.GetRow()
 
         if self.clickedColumn >= 0:
+            if (cntldown):
+                sc=self._grid.GetSelectedCells()
+
+                if self.clickedColumn < 1:
+                    for i in range(self.clickedColumn, 1): i=0
             self._grid.ClearSelection()
             self._grid.SelectCol(self.clickedColumn)
 
@@ -677,54 +682,87 @@ class DataGrid():
             return True
         return False
 
+
+    def SelectRows(self, top, bottom) -> None:
+        self._grid.SelectRow(top)
+        for i in range(top+1, bottom+1):
+            self._grid.SelectRow(i, addToSelected = True)
+
+    def SelectCols(self, left, right) -> None:
+        self._grid.SelectCol(left)
+        for i in range(left+1, right+1):
+            self._grid.SelectCol(i, addToSelected = True)
+
+    # Top, Left, Right, Bottom
+    def SelectionBoundingBox(self) -> Optional[tuple[int, int, int, int]]:
+        if len(self._grid.SelectionBlockTopLeft) == 0:
+            return None
+        top=99999
+        left=99999
+        for box in self._grid.SelectionBlockTopLeft:
+            t, l = box
+            top=min(top, t)
+            left=min(left, l)
+        bottom=-1
+        right=-1
+        for box in self._grid.SelectionBlockBottomRight:
+            b, r = box
+            bottom=max(bottom, b)
+            right=max(right, r)
+
+        return top, left, bottom, right
+
+
+
+    # Take the existing selected cells and extend the selection to the full rows
+    def ExtendRowSelection(self) -> tuple[int, int]:
+        if len(self._grid.SelectionBlockTopLeft) == 0:
+            return -1, -1
+        top, _, bottom, _=self.SelectionBoundingBox()
+        self.SelectRows(top, bottom)
+        return top, bottom
+
+    # Take the existing selected cells and extend the selection to the full columns
+    def ExtendColumnSelection(self) -> tuple[int, int]:
+        if len(self._grid.SelectionBlockTopLeft) == 0:
+            return -1, -1
+        _, left, _, right=self.SelectionBoundingBox()
+        self.SelectCols((left, right))
+        return left, right
+
     #-------------------
     def OnKeyDown(self, event):        # Grid
         top, left, bottom, right=self.LocateSelection()
 
         if event.KeyCode == 67 and self.cntlDown:   # cntl-C
             self.CopyCells(top, left, bottom, right)
+
         elif event.KeyCode == 86 and self.cntlDown and self.clipboard is not None and len(self.clipboard) > 0: # cntl-V
             self.PasteCells(top, left)
-        elif event.KeyCode == 308:                  # cntl
+
+        elif event.KeyCode == 308:                  # cntl key alone
             self.cntlDown=True
+            print("cntlDown=True")
+
         elif event.KeyCode == 68:                   # Kludge to be able to force a refresh (press "d")
             self.RefreshGridFromDatasource()
+
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
-            tl=self._grid.SelectionBlockTopLeft
-            br=self._grid.SelectionBlockBottomRight
-            # Only if there's a single selected block
-            if len(tl) == 1 and len(br) == 1:
-                top, left=tl[0]
-                bottom, right=br[0]
+            top, bottom=self.ExtendRowSelection()
+            if top != -1:   # There must be a selection
                 if top > 0: # Can't move up if the first row selected is row 0
-                    # Extend the selection to be the whole row(s)
-                    left=0
-                    right=self.NumCols-1
-                    # And move 'em up 1
-                    self.MoveRows(top, bottom-top+1, top-1)
-                    # And re-establish the selection
-                    top-=1
-                    bottom-=1
-                    self._grid.SelectBlock(top, left, bottom, right)
+                    self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
+                    self.SelectRows(top-1, bottom-1)
                     self.RefreshGridFromDatasource()
+
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
-            tl=self._grid.SelectionBlockTopLeft
-            br=self._grid.SelectionBlockBottomRight
-            # Only if there's exactly one selected block
-            if len(tl) == 1 and len(br) == 1:
-                top, _=tl[0]
-                bottom, right=br[0]
-                self.ExpandDataSourceToInclude(bottom+1, right)
-                if bottom < self._grid.NumberRows:
-                    # Extend the selection to be the whole row(s)
-                    right=self.NumCols-1
-                    # And move 'em down 1
-                    self.MoveRows(top, bottom-top+1, top+1)
-                    # And re-establish the selection
-                    top+=1
-                    bottom+=1
-                    self._grid.SelectBlock(top, left, bottom, right)
+            top, bottom=self.ExtendRowSelection()
+            if top != -1:   # There must be a selection
+                if bottom < self._grid.NumberRows:      # Can't move further down if the bottom row is selected
+                    self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
+                    self.SelectRows(top+1, bottom+1)
                     self.RefreshGridFromDatasource()
+
         else:
             event.Skip()
 
@@ -732,6 +770,7 @@ class DataGrid():
     def OnKeyUp(self, event):        # Grid
         if event.KeyCode == 308:                    # cntl
             self.cntlDown=False
+            print("cntlDown=False")
         event.Skip()
 
     #------------------
