@@ -582,7 +582,20 @@ class DataGrid():
                     return
             event.Veto()
 
+    # ------------------
+    def OnGridLabelLeftClick(self, event):
+        self.clickedColumn=event.GetCol()
+        self.clickedRow=event.GetRow()
 
+        if self.clickedColumn >= 0:
+            self._grid.ClearSelection()
+            self._grid.SelectCol(self.clickedColumn)
+
+        if self.clickedRow >= 0:
+            self._grid.ClearSelection()
+            self._grid.SelectRow(self.clickedRow)
+
+    # ------------------
     def OnGridLabelRightClick(self, event, m_GridLabelPopup):
         self.clickedColumn=event.GetCol()
         self.clickedRow=event.GetRow()
