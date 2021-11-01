@@ -583,16 +583,11 @@ class DataGrid():
             event.Veto()
 
     # ------------------
-    def OnGridLabelLeftClick(self, event, cntldown: bool):
+    def OnGridLabelLeftClick(self, event):
         self.clickedColumn=event.GetCol()
         self.clickedRow=event.GetRow()
 
         if self.clickedColumn >= 0:
-            if (cntldown):
-                sc=self._grid.GetSelectedCells()
-
-                if self.clickedColumn < 1:
-                    for i in range(self.clickedColumn, 1): i=0
             self._grid.ClearSelection()
             self._grid.SelectCol(self.clickedColumn)
 
