@@ -105,7 +105,7 @@ class GridDataSource():
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
         return True
     @abstractmethod
-    def DelCol(self, icol: int) -> None:
+    def DelCol(self, icol: int) -> None:    # This *must* be implated int he derived class because the data is so various
         pass
 
     @property
@@ -493,15 +493,15 @@ class DataGrid():
         for i, r in enumerate(tpermuter):
             permuter[r]=i
 
-        Log("\npermuter: "+str(permuter))
-        Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+        # Log("\npermuter: "+str(permuter))
+        # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
         # Now use the permuter to update the row numbers of the cells which are allowed to be edited
         for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
             try:
                 self._datasource.AllowCellEdits[i]=(permuter[row], col)
             except:
                 pass
-        Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+        # Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
 
     #--------------------------------------------------------
     # Move a block of rows within the data source
@@ -521,14 +521,14 @@ class DataGrid():
             i2=list(range(dest, start))
             i3=list(range(start, end+1))
             i4=list(range(end+1, len(rows)))
-            print(f"{i1=}  {i2=}  {i3=}  {i4=}")
+            # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
         else:
             # Move Later
             i1=list(range(0, start))
             i2=list(range(start, end+1))
             i3=list(range(end+1, end+1+dest-start))
             i4=list(range(end+1+dest-start, len(rows)))
-            print(f"{i1=}  {i2=}  {i3=}  {i4=}")
+            # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
 
         tpermuter: list[int]=i1+i3+i2+i4
         permuter: list[int]=[-1]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
@@ -541,9 +541,9 @@ class DataGrid():
                 temp[i]=row.GetVal(i)
             for i in range(self.NumCols):
                 row.SetVal(permuter[i], temp[i])
-        Log("permuter: "+str(permuter))
-        Log("tpermuter: "+str(tpermuter))
-        Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+        # Log("permuter: "+str(permuter))
+        # Log("tpermuter: "+str(tpermuter))
+        # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
 
         # Move the column labels
         temp: list[Any]=[None]*self.NumCols
@@ -558,7 +558,7 @@ class DataGrid():
                 self._datasource.AllowCellEdits[i]=(permuter[row], col)
             except:
                 pass
-        Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+        # Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
 
 
     # ------------------
@@ -747,10 +747,10 @@ class DataGrid():
             self._grid.SelectCol(i, addToSelected = True)
 
     # Return a box which bounds all selections in the grid
-    # Top, Left, Right, Bottom
+    # Top, Left, Bottom, Right
     def SelectionBoundingBox(self) -> Optional[tuple[int, int, int, int]]:
         if len(self._grid.SelectionBlockTopLeft) == 0:
-            return None
+            return -1, -1, -1, -1
         top=99999
         left=99999
         for t, l in self._grid.SelectionBlockTopLeft:
@@ -799,7 +799,7 @@ class DataGrid():
             self.RefreshGridFromDatasource()
 
         elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
-            print("**move left")
+            #print("**move left")
             left, right=self.ExtendColSelection()
             if right != -1:   # There must be a selection
                 if left > 0: # Can move left only if the first col selected is not col 0
@@ -816,7 +816,7 @@ class DataGrid():
                     self.RefreshGridFromDatasource()
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
-            print("**move right")
+            #print("**move right")
             left, right=self.ExtendColSelection()
             if right != -1:   # There must be a selection
                 if right < self._grid.NumberCols-1:    # Can move further right only if the rightmost col is not selected
@@ -859,11 +859,16 @@ class DataGrid():
 
     # Delete the selected columns
     def OnPopupDelCol(self, event):
-        icol=self.clickedColumn
-        del self.Datasource.ColDefs[icol]
-        for i, row in enumerate(self.Datasource.Rows):
-            row.DelCol(icol)
-            self.Datasource.Rows[i]=row
+        _, left, _, right=self.SelectionBoundingBox()
+        if left == -1 or right == -1:
+            icols=[self.clickedColumn]
+        else:
+            icols=range(left, right+1)
+        for icol in icols:
+            del self.Datasource.ColDefs[icol]
+            for i, row in enumerate(self.Datasource.Rows):
+                row.DelCol(icol)
+                self.Datasource.Rows[i]=row
 
         self.RefreshGridFromDatasource()
         event.Skip()
