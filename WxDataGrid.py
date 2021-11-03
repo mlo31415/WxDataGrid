@@ -716,7 +716,7 @@ class DataGrid():
     #   There is a selection block defined
     #   There is a SelectedCells defined
     #   There is a GridCursor location
-    def LocateSelection(self):        # Grid
+    def LocateSelection(self) -> tuple[int, int, int, int]:        # Grid
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
             top, left=self._grid.SelectionBlockTopLeft[0]
             bottom, right=self._grid.SelectionBlockBottomRight[0]
@@ -728,7 +728,7 @@ class DataGrid():
             top=bottom=self._grid.GridCursorRow
         return top, left, bottom, right
 
-    def HasSelection(self):        # Grid
+    def HasSelection(self) -> bool:        # Grid
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
             return True
         if len(self._grid.SelectedCells) > 0:
