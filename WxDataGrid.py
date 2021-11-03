@@ -848,6 +848,7 @@ class DataGrid():
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
+        self.RefreshGridFromDatasource()
         event.Skip()
 
     #------------------
@@ -855,6 +856,7 @@ class DataGrid():
     def OnPopupPaste(self, event):        # Grid
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
+        self.RefreshGridFromDatasource()
         event.Skip()
 
     def OnPopupClearSelection(self, event):
