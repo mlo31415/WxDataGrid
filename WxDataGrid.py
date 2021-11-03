@@ -878,7 +878,6 @@ class DataGrid():
             del self.Datasource.ColDefs[icol]
             for i, row in enumerate(self.Datasource.Rows):
                 row.DelCol(icol)
-                self.Datasource.Rows[i]=row
 
         self.RefreshGridFromDatasource()
         event.Skip()
