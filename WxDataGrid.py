@@ -857,6 +857,15 @@ class DataGrid():
         self.PasteCells(top, left)
         event.Skip()
 
+    def OnPopupClearSelection(self, event):
+        top, left, bottom, right=self.LocateSelection()
+        for irow in range(top, bottom+1):
+            for icol in range (left, right+1):
+                self.Datasource.SetDataVal(irow, icol, "")
+        self.RefreshGridFromDatasource()
+        event.Skip()
+
+
     # Delete the selected columns
     def OnPopupDelCol(self, event):
         _, left, _, right=self.SelectionBoundingBox()
