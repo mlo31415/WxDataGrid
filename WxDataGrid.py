@@ -64,6 +64,12 @@ class GridDataRowClass:
     def IsTextRow(self) -> bool:
         return False            # Override only if needed
 
+    @property
+    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
+        return True
+    @abstractmethod
+    def DelCol(self, icol: int) -> None:    # This *must* be implemented in the derived class because the data is so various
+        pass
 
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
@@ -100,13 +106,6 @@ class GridDataSource():
     @AllowCellEdits.setter
     def AllowCellEdits(self, val: list[tuple[int, int]]) -> None:
         self._allowCellEdits=val
-
-    @property
-    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
-        return True
-    @abstractmethod
-    def DelCol(self, icol: int) -> None:    # This *must* be implated int he derived class because the data is so various
-        pass
 
     @property
     def NumCols(self) -> int:
