@@ -868,7 +868,7 @@ class DataGrid():
 
 
     # Delete the selected columns
-    def OnPopupDelCol(self, event):
+    def DeleteSelectedColumns(self):
         _, left, _, right=self.SelectionBoundingBox()
         if left == -1 or right == -1:
             icols=[self.clickedColumn]
@@ -878,12 +878,18 @@ class DataGrid():
             del self.Datasource.ColDefs[icol]
             for i, row in enumerate(self.Datasource.Rows):
                 row.DelCol(icol)
-
+        self._grid.ClearSelection()
         self.RefreshGridFromDatasource()
         event.Skip()
 
-    def OnPopupDelRow(self, event):
-        del self.Datasource.Rows[self.clickedRow:self.clickedRow+1]
+
+    def DeleteSelectedRows(self):
+        top, _, bottom, _=self.SelectionBoundingBox()
+        if top == -1 or bottom == -1:
+            top=self.clickedRow
+            bottom=self.clickedRow
+        del self.Datasource.Rows[top:bottom+1]
+        self._grid.ClearSelection()
         self.RefreshGridFromDatasource()
         event.Skip()
 
