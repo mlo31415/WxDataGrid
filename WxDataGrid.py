@@ -71,6 +71,11 @@ class GridDataRowClass:
     def DelCol(self, icol: int) -> None:    # This *must* be implemented in the derived class because the data is so various
         pass
 
+    # This needs to be implemented only if the datasource allows the addition of new columns
+    @abstractmethod
+    def append(self, val):
+        pass
+
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
 
@@ -596,16 +601,19 @@ class DataGrid():
     # Expand the grid's data source so that the local item (irow, icol) exists.
     def ExpandDataSourceToInclude(self, irow: int, icol: int) -> None:
         assert irow >= 0 and icol >= 0
+
+        # Add new rows if needed
         while irow >= len(self._datasource.Rows):
             self._datasource.Rows.append(self._datasource.Element())
 
+        # And add new columns
         # Many data sources do not allow expanding the number of columns, so check that first
         assert icol < len(self._datasource.ColDefs) or self._datasource.CanAddColumns
         if self._datasource.CanAddColumns:
             while icol >= len(self._datasource.ColDefs):
                 self._datasource.ColDefs.append(ColDefinition())
                 for j in range(self._datasource.NumRows):
-                    self._datasource.Rows[j].append("")
+                    self._datasource.Rows[j].append("") # Note that append is implemented only when collums can be added
 
 
     #------------------
