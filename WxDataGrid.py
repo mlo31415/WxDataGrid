@@ -12,7 +12,7 @@ from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 #================================================================
 @dataclass
 class ColDefinition:
-    Name: str
+    Name: str=""
     Width: int=100
     Type: str=""
     IsEditable: str="yes"
@@ -23,6 +23,101 @@ class ColDefinition:
         if self.preferred != "":
             return self.preferred
         return self.Name
+
+@dataclass
+class ColDefinitionsList:
+    List: list[ColDefinition]
+
+    # Implement 'in' as in "name" in ColDefinitionsList
+    def __contains__(self, val: str) -> bool:
+        return any([x.Name == val or x.preferred == val for x in self.List])
+    #--------------------------
+    # Look up the index of a ColDefinition by name
+    def __index__(self, val: str) -> int:
+        return self.index(val)
+
+    def index(self, val: str) -> int:
+        if val not in self: # Calls __contains__
+            raise IndexError
+        return [x.Name == val or x.preferred == val for x in self.List].index(True)
+
+    # --------------------------
+    # Index can be a name or a list index
+    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:
+        if type(index) is str:     # The name of the column
+            if index not in self: # Calls __contains__
+                return ColDefinition(Name=index)
+            return [x for x in self.List if x.Name == index or x.preferred == index][0]
+        if type(index) is int:
+            return self.List[index]
+        if type(index) is slice:
+            return ColDefinitionsList(self.List[index])
+        raise KeyError
+
+    #--------------------------
+    def __delitem__(self, index: Union[str, int, slice]) -> None:
+        if type(index) is str:      # The name of the column
+            if index in self: # Calls __contains__
+                i=self.index(index)
+                del self.List[i]
+                return
+            raise IndexError
+
+        if type(index) is int:      # The index of the column
+            del self.List[index]
+            return
+
+        if type(index) is slice:
+            del self.List[index]
+            return
+
+        raise KeyError
+
+    #--------------------------
+    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:
+        if type(index) is str:      # The name of the column
+            if index in self: # Calls __contains__
+                i=self.index(index)
+                self.List[i]=value
+                return
+            if value.Name == "":
+                value.Name=index
+            if value.Name != index:
+                raise ValueError
+            self.List.append(value)
+            return
+
+        if type(index) is int:      # The index of the column
+            self.List[index]=value
+            return
+
+        if type(index) is slice:
+            assert index[2] == 0
+            self.List=self.List[index[0]:index[1]]+[value]+self.List[index[1]:]
+            return
+
+        raise KeyError
+
+
+    def __len__(self) -> int:
+        return len(self.List)
+
+    def append(self, val: ColDefinition):
+        self.List.append(val)
+
+    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:
+        return ColDefinitionsList(self.List+val.List)
+
+    def __iter__(self):
+        self._it=0
+        return self
+
+    def __next__(self):
+        if self._it == len(self.List):
+            raise StopIteration
+        val=self.List[self._it]
+        self._it+=1
+        return val
 
 
 #================================================================
@@ -66,7 +161,7 @@ class GridDataRowClass:
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
         return True
     @abstractmethod
-    def DelCol(self, icol: int) -> None:    # This *must* be implemented in the derived class because the data is so various
+    def DelCol(self, icol) -> None:    # This *must* be implemented in the derived class because the data is so various
         pass
 
     # This needs to be implemented only if the datasource allows the addition of new columns
@@ -78,7 +173,7 @@ class GridDataRowClass:
 class GridDataSource():
 
     def __init__(self):
-        self._colDefs: list[ColDefinition]=[]
+        self._colDefs: ColDefinitionsList=ColDefinitionsList([])
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
         self._gridDataRowClass: GridDataRowClass=None
 
@@ -93,10 +188,10 @@ class GridDataSource():
         return self._gridDataRowClass
 
     @property
-    def ColDefs(self) -> list[ColDefinition]:
+    def ColDefs(self) -> ColDefinitionsList:
         return self._colDefs
     @ColDefs.setter
-    def ColDefs(self, cds: list[ColDefinition]):
+    def ColDefs(self, cds: ColDefinitionsList):
         self._colDefs=cds
 
     @property
@@ -179,8 +274,8 @@ class DataGrid():
     def MakeTextLinesEditable(self) -> None:
         for irow, row in enumerate(self._datasource.Rows):
             if row.IsTextRow or row.IsLinkRow:
-                for icol in range(self.NumCols):
-                    if self._datasource.ColDefs[icol].IsEditable == "maybe":
+                for icol, ch in enumerate(self._datasource.ColDefs):
+                    if ch.IsEditable == "maybe":
                         self.AllowCellEdit(irow, icol)
 
 
@@ -295,7 +390,7 @@ class DataGrid():
 
 
     # --------------------------------------------------------
-    def SetColHeaders(self, coldefs: list[ColDefinition]) -> None:        # Grid
+    def SetColHeaders(self, coldefs: ColDefinitionsList) -> None:        # Grid
         self.NumCols=len(coldefs)   # If necessary, change the grid to match the ColDefs
         # Add the column headers
         for i, cd in enumerate(coldefs):
@@ -390,7 +485,6 @@ class DataGrid():
                 font.SetUnderlined(False)
                 self._grid.SetCellFont(irow, icol, font)
 
-
     # --------------------------------------------------------
     def ColorCellsByValue(self):        # Grid
         # Analyze the data and highlight cells where the data type doesn't match the header.  (E.g., Volume='August', Month='17', year='20')
@@ -417,8 +511,9 @@ class DataGrid():
         return None
 
     # --------------------------------------------------------
+    #TODO: Why do we have this and also RefreshGridFromLSTFile??
     def RefreshGridFromDatasource(self):        # Grid
-        self.EvtHandlerEnabled=False
+        #self.EvtHandlerEnabled=False
         self._grid.ClearGrid()
         # if self._grid.NumberRows > self._datasource.NumRows:
         #     # This is to get rid of any trailling formatted rows
@@ -452,7 +547,7 @@ class DataGrid():
 
         rows=self.GetSelectedRowRange()
         if rows is not None:
-            self._grid.MakeCellVisible(rows[0], 0)
+            self._grid.MakeCellVisible(rows[0], 0)  #TODO: What does this do?
 
 
     #--------------------------------------------------------
@@ -548,7 +643,7 @@ class DataGrid():
         # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
 
         # Move the column labels
-        temp: list[Any]=[None]*self.NumCols
+        temp: list=[None]*self.NumCols
         for i in range(self.NumCols):
             temp[i]=self.Datasource.ColDefs[i]
         for i in range(self.NumCols):
@@ -621,7 +716,7 @@ class DataGrid():
 
     #------------------
     def OnGridCellChanged(self, event):        # Grid
-        self.EvtHandlerEnabled=False
+        #self.EvtHandlerEnabled=False
         row=event.GetRow()
         col=event.GetCol()
 
@@ -634,8 +729,7 @@ class DataGrid():
         self.ColorCellByValue(row, col)
         self.RefreshGridFromDatasource()
         self.AutoSizeColumns()
-        self.EvtHandlerEnabled=True
-
+        #self.EvtHandlerEnabled=True
 
     # ------------------
     def OnGridEditorShown(self, event):
@@ -867,16 +961,16 @@ class DataGrid():
     def DeleteSelectedColumns(self):
         _, left, _, right=self.SelectionBoundingBox()
         if left == -1 or right == -1:
-            icols=[self.clickedColumn]
-        else:
-            icols=range(left, right+1)
-        for icol in icols:
-            del self.Datasource.ColDefs[icol]
+            del self.Datasource.ColDefs[self.clickedColumn]
             for i, row in enumerate(self.Datasource.Rows):
-                row.DelCol(icol)
+                row.DelCol(self.clickedColumn)
+        else:
+            icols=slice(left, right+1)
+            del self.Datasource.ColDefs[icols]
+            for i, row in enumerate(self.Datasource.Rows):
+                row.DelCol(icols)
         self._grid.ClearSelection()
         self.RefreshGridFromDatasource()
-        event.Skip()
 
 
     def DeleteSelectedRows(self):
@@ -887,7 +981,6 @@ class DataGrid():
         del self.Datasource.Rows[top:bottom+1]
         self._grid.ClearSelection()
         self.RefreshGridFromDatasource()
-        event.Skip()
 
     def OnPopupRenameCol(self, event):
         v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
@@ -896,23 +989,22 @@ class DataGrid():
             self.Datasource.ColDefs[icol].Name=v
             self.RefreshGridFromDatasource()
 
-    def InsertColumn(self, event, offset: int) -> None:
+    def InsertColumn(self, icol: int) -> None:
         v=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
         if v is None or len(v.strip()) == 0:
-            event.Skip()
+            #event.Skip()
             return
 
-        icol=self.clickedColumn+offset
         for row in self.Datasource.Rows:
             row._cells=row._cells[:icol]+[""]+row._cells[icol:]
-        self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+[ColDefinition(v)]+self.Datasource.ColDefs[icol:]
+        self.Datasource.ColDefs=self.Datasource.ColDefs[:icol+1]+ColDefinitionsList([ColDefinition(v)])+self.Datasource.ColDefs[icol+1:]
         self.RefreshGridFromDatasource()
 
     def OnPopupInsertColLeft(self, event):
-        self.InsertColumn(event, 0)
+        self.InsertColumn(self.clickedColumn)
 
     def OnPopupInsertColRight(self, event):
-        self.InsertColumn(event, 1)
+        self.InsertColumn(self.clickedColumn+1)
 
     def OnPopupExtractScanner(self, event):
         event.Skip()
