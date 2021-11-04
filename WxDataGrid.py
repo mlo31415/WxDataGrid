@@ -6,10 +6,8 @@ from abc import abstractmethod
 import wx
 import wx.grid
 
-import HelpersPackage
 from HelpersPackage import IsInt, MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
-from Log import Log
 
 #================================================================
 @dataclass
