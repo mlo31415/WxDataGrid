@@ -662,16 +662,12 @@ class DataGrid():
             self._grid.ClearSelection()
             self._grid.SelectRow(self.clickedRow)
 
-    # ------------------
-    def OnGridLabelRightClick(self, event, m_GridLabelPopup):
-        self.clickedColumn=event.GetCol()
-        self.clickedRow=event.GetRow()
 
-        if m_GridLabelPopup is None:
-            event.skip()
+    def DefaultPopupEnabler(self, event, popup) -> None:
+        self.SaveClickLocation(event)
 
         # Set everything to disabled.
-        for mi in m_GridLabelPopup.GetMenuItems():
+        for mi in popup.GetMenuItems():
             mi.Enable(False)
 
         # Everything remains disabled when we're outside the defined columns
@@ -680,12 +676,19 @@ class DataGrid():
 
         # We enable the Copy item if have a selection
         if self.HasSelection():
-            mi=m_GridLabelPopup.FindItemById(m_GridLabelPopup.FindItem("Copy"))
+            mi=popup.FindItemById(popup.FindItem("Copy"))
             mi.Enable(True)
 
         # We enable the Paste popup menu item if there is something to paste
-        mi=m_GridLabelPopup.FindItemById(m_GridLabelPopup.FindItem("Paste"))
+        mi=popup.FindItemById(popup.FindItem("Paste"))
         mi.Enabled=self.clipboard is not None and len(self.clipboard) > 0 and len(self.clipboard[0]) > 0  # Enable only if the clipboard contains actual content
+
+
+    # ------------------
+    def OnGridLabelRightClick(self, event, m_GridLabelPopup):
+        if m_GridLabelPopup is None:
+            event.skip()
+        self.DefaultPopupEnabler(event, m_GridLabelPopup)
 
 
     #------------------
@@ -693,25 +696,7 @@ class DataGrid():
     # Then it enables copy and paste if appropriate.
     # Further handling is the responsibility of the application which called it
     def OnGridCellRightClick(self, event, m_GridPopup):        # Grid
-        self.clickedColumn=event.GetCol()
-        self.clickedRow=event.GetRow()
-
-        # Set everything to disabled.
-        for mi in m_GridPopup.GetMenuItems():
-            mi.Enable(False)
-
-        # Everything remains disabled when we're outside the defined columns
-        if self.clickedColumn > len(self._datasource.ColDefs)+1:
-            return
-
-        # We enable the Copy item if have a selection
-        if self.HasSelection():
-            mi=m_GridPopup.FindItemById(m_GridPopup.FindItem("Copy"))
-            mi.Enable(True)
-
-        # We enable the Paste popup menu item if there is something to paste
-        mi=m_GridPopup.FindItemById(m_GridPopup.FindItem("Paste"))
-        mi.Enabled=self.clipboard is not None and len(self.clipboard) > 0 and len(self.clipboard[0]) > 0  # Enable only if the clipboard contains actual content
+        self.DefaultPopupEnabler(event, m_GridPopup)
 
 
     #-------------------
