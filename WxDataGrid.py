@@ -613,6 +613,11 @@ class DataGrid():
                 for j in range(self._datasource.NumRows):
                     self._datasource.Rows[j].append("") # Note that append is implemented only when collums can be added
 
+    #------------------------------------
+    # In many even handlers we need to save the click location
+    def SaveClickLocation(self, event):
+        self.clickedColumn=event.GetCol()
+        self.clickedRow=event.GetRow()
 
     #------------------
     def OnGridCellChanged(self, event):        # Grid
@@ -647,8 +652,7 @@ class DataGrid():
 
     # ------------------
     def OnGridLabelLeftClick(self, event):
-        self.clickedColumn=event.GetCol()
-        self.clickedRow=event.GetRow()
+        self.SaveClickLocation(event)
 
         if self.clickedColumn >= 0:
             self._grid.ClearSelection()
@@ -712,8 +716,9 @@ class DataGrid():
 
     #-------------------
     def OnGridCellDoubleClick(self, event):        # Grid
-        self.clickedColumn=event.GetCol()
-        self.clickedRow=event.GetRow()
+        self.SaveClickLocation(event)
+        #TODO: Is this all?
+
 
     #-------------------
     # Locate the selection, real or implied
