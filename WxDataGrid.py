@@ -263,7 +263,6 @@ class DataGrid():
     def Signature(self) -> int:
         return hash(self._grid)+self._datasource.Signature()
 
-
     # --------------------------------------------------------
     def AllowCellEdit(self, irow: int, icol: int) -> None:
         self._datasource.AllowCellEdits.append((irow, icol))
@@ -481,7 +480,7 @@ class DataGrid():
                 font.MakeUnderlined()
                 self._grid.SetCellFont(irow, icol, font)
             else:
-                #self._grid.SetCellTextColour(irow, icol, Color.Blue)
+                #self._dataGrid.SetCellTextColour(irow, icol, Color.Blue)
                 font.SetUnderlined(False)
                 self._grid.SetCellFont(irow, icol, font)
 
@@ -510,15 +509,14 @@ class DataGrid():
 
         return None
 
-    # --------------------------------------------------------
-    #TODO: Why do we have this and also RefreshGridFromLSTFile??
-    def RefreshGridFromDatasource(self):        # Grid
+    # ------------------
+    def RefreshWxGridFromDatasource(self):        # Grid
         #self.EvtHandlerEnabled=False
         self._grid.ClearGrid()
-        # if self._grid.NumberRows > self._datasource.NumRows:
+        # if self._dataGrid.NumberRows > self._datasource.NumRows:
         #     # This is to get rid of any trailling formatted rows
-        #     self._grid.DeleteRows(self._datasource.NumRows, self._grid.NumberRows-self._datasource.NumRows)
-        #     self._grid.AppendRows(self._grid.NumberRows-self._datasource.NumRows)
+        #     self._dataGrid.DeleteRows(self._datasource.NumRows, self._dataGrid.NumberRows-self._datasource.NumRows)
+        #     self._dataGrid.AppendRows(self._dataGrid.NumberRows-self._datasource.NumRows)
         #     #TODO: Need to decide if we're going to leave any empty rows
 
         self.SetColHeaders(self._datasource.ColDefs)
@@ -688,7 +686,7 @@ class DataGrid():
         for i, row in enumerate(self.clipboard, start=pasteTop):
             for j, cellval in enumerate(row, start=pasteLeft):
                 self._datasource.SetDataVal(i, j, cellval)
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
@@ -727,7 +725,7 @@ class DataGrid():
         self._datasource.SetDataVal(row, col, newVal)
         #Log("set datasource("+str(row)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
         self.AutoSizeColumns()
         #self.EvtHandlerEnabled=True
 
@@ -885,7 +883,7 @@ class DataGrid():
             print("cntlDown=True")
 
         elif event.KeyCode == 68:                   # Kludge to be able to force a refresh (press "d")
-            self.RefreshGridFromDatasource()
+            self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
             #print("**move left")
@@ -894,7 +892,7 @@ class DataGrid():
                 if left > 0: # Can move left only if the first col selected is not col 0
                     self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
                     self.SelectCols(left-1, right-1)
-                    self.RefreshGridFromDatasource()
+                    self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
@@ -902,7 +900,7 @@ class DataGrid():
                 if top > 0:  # Can move up only if the first row selected is not row 0
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
-                    self.RefreshGridFromDatasource()
+                    self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
@@ -911,7 +909,7 @@ class DataGrid():
                 if right < self._grid.NumberCols-1:    # Can move further right only if the rightmost col is not selected
                     self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
                     self.SelectCols(left+1, right+1)
-                    self.RefreshGridFromDatasource()
+                    self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             top, bottom=self.ExtendRowSelection()
@@ -919,7 +917,7 @@ class DataGrid():
                 if bottom < self._grid.NumberRows-1:      # Can move further down only if the bottom row is not selected
                     self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
                     self.SelectRows(top+1, bottom+1)
-                    self.RefreshGridFromDatasource()
+                    self.RefreshWxGridFromDatasource()
 
         else:
             event.Skip()
@@ -937,7 +935,7 @@ class DataGrid():
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
         event.Skip()
 
     #------------------
@@ -945,7 +943,7 @@ class DataGrid():
     def OnPopupPaste(self, event):        # Grid
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
         event.Skip()
 
     def OnPopupClearSelection(self, event):
@@ -953,7 +951,7 @@ class DataGrid():
         for irow in range(top, bottom+1):
             for icol in range (left, right+1):
                 self.Datasource.SetDataVal(irow, icol, "")
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
         event.Skip()
 
 
@@ -970,7 +968,7 @@ class DataGrid():
             for i, row in enumerate(self.Datasource.Rows):
                 row.DelCol(icols)
         self._grid.ClearSelection()
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
 
 
     def DeleteSelectedRows(self):
@@ -980,25 +978,26 @@ class DataGrid():
             bottom=self.clickedRow
         del self.Datasource.Rows[top:bottom+1]
         self._grid.ClearSelection()
-        self.RefreshGridFromDatasource()
+        self.RefreshWxGridFromDatasource()
 
     def OnPopupRenameCol(self, event):
         v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
         if v is not None:
             icol=self.clickedColumn
             self.Datasource.ColDefs[icol].Name=v
-            self.RefreshGridFromDatasource()
+            self.RefreshWxGridFromDatasource()
 
-    def InsertColumn(self, icol: int) -> None:
-        v=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
-        if v is None or len(v.strip()) == 0:
-            #event.Skip()
-            return
+    def InsertColumn(self, icol: int, name: str="") -> None:
+        if name == "":
+            name=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
+            if name is None or len(name.strip()) == 0:
+                #event.Skip()
+                return
 
         for row in self.Datasource.Rows:
             row._cells=row._cells[:icol]+[""]+row._cells[icol:]
-        self.Datasource.ColDefs=self.Datasource.ColDefs[:icol+1]+ColDefinitionsList([ColDefinition(v)])+self.Datasource.ColDefs[icol+1:]
-        self.RefreshGridFromDatasource()
+        self.Datasource.ColDefs=self.Datasource.ColDefs[:icol+1]+ColDefinitionsList([ColDefinition(name)])+self.Datasource.ColDefs[icol+1:]
+        self.RefreshWxGridFromDatasource()
 
     def OnPopupInsertColLeft(self, event):
         self.InsertColumn(self.clickedColumn)
