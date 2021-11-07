@@ -133,6 +133,8 @@ class Color:
      White=wx.Colour(255, 255, 255)
      Black=wx.Colour(0, 0, 0)
 
+
+
 # An abstract class defining a row  of the GridDataSource
 class GridDataRowClass:
 
@@ -142,11 +144,11 @@ class GridDataRowClass:
 
     # Get or set a value by name or column number in the grid
     @abstractmethod
-    def GetVal(self, icol: int) -> Union[str, int, bool]:
-        return 0
+    def __getitem__(self, index: Union[int, slice]) -> str:
+        pass
 
     @abstractmethod
-    def SetVal(self, icol: int, val: Union[str, int, bool]) -> None:
+    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:
         pass
 
     @property
@@ -215,7 +217,11 @@ class GridDataSource():
         pass
 
     @abstractmethod
-    def GetData(self, iRow: int, iCol: int) -> str:
+    def __getitem__(self, index: int) -> GridDataRowClass:
+        pass
+
+    @abstractmethod
+    def __setitem__(self, index: int, val: GridDataRowClass) -> None:
         pass
 
     @property
@@ -225,10 +231,6 @@ class GridDataSource():
     @Rows.setter
     @abstractmethod
     def Rows(self, rows: list[GridDataRowClass]) -> None:
-        pass
-
-    @abstractmethod
-    def SetDataVal(self, irow: int, icol: int, val: Union[int, str, FanzineDateRange]) -> None:
         pass
 
     @property
@@ -279,31 +281,12 @@ class DataGrid():
 
 
     # --------------------------------------------------------
-    # Set a grid cell value
-    # Note that this does not change the underlying source data
-    def SetCellValue(self, iRow: int, iCol: int, val) -> None:        # Grid
-        # Extend the grid if needed
-        nrows=self._grid.GetNumberRows()
-        if iRow >= nrows:
-            self._grid.AppendRows(iRow-nrows+1)
-        ncols=self._grid.GetNumberCols()
-        if iCol >= ncols:
-            self._grid.AppendCols(iCol-ncols+1)
-
-        # None values are replaced by empty strings
-        if val is None:
-            val=""
-        if type(val) is not str:
-            val=str(val)
-
-        self._grid.SetCellValue(iRow, iCol, val)
-
-    # --------------------------------------------------------
     # Get a cell value
     # Note that this does not change the underlying data
-    def Get(self, row: int, col: int) -> str:
-        return self._grid.GetCellValue(row, col)
-
+    #def Get(self, row: int, col: int) -> str:
+    @abstractmethod
+    def __getitem__(self, index: int):
+        return self._grid[index]
 
     # --------------------------------------------------------
     @property
@@ -538,7 +521,7 @@ class DataGrid():
                 self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
             for icol in range(len(self._datasource.ColDefs)):
-                self.SetCellValue(irow, icol, self._datasource.GetData(irow, icol))
+                self._grid.SetCellValue(irow, icol, self._datasource[irow][icol])
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
@@ -633,9 +616,9 @@ class DataGrid():
         for row in rows:
             temp=[-1]*self.NumCols
             for i in range(self.NumCols):
-                temp[i]=row.GetVal(i)
+                temp[i]=row[i]
             for i in range(self.NumCols):
-                row.SetVal(permuter[i], temp[i])
+                row[permuter[i]]=temp[i]
         # Log("permuter: "+str(permuter))
         # Log("tpermuter: "+str(tpermuter))
         # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
@@ -662,7 +645,7 @@ class DataGrid():
         for iRow in range(top, bottom+1):
             v=[]
             for jCol in range(left, right+1):
-                v.append(self._datasource.GetData(iRow, jCol))
+                v.append(self._datasource[iRow][jCol])
             self.clipboard.append(v)
 
 
@@ -685,7 +668,7 @@ class DataGrid():
         # Copy the cells from the clipboard to the grid in lstData.
         for i, row in enumerate(self.clipboard, start=pasteTop):
             for j, cellval in enumerate(row, start=pasteLeft):
-                self._datasource.SetDataVal(i, j, cellval)
+                self._datasource[i][j]=cellval
         self.RefreshWxGridFromDatasource()
 
     # --------------------------------------------------------
@@ -721,8 +704,8 @@ class DataGrid():
         # If we're entering data in a new row or a new column, append the necessary number of new rows and/or columns to the data source
         self.ExpandDataSourceToInclude(row, col)
 
-        newVal=self.Get(row, col)
-        self._datasource.SetDataVal(row, col, newVal)
+        newVal=self._grid.GetCellValue(row, col)
+        self._datasource[row][col]=newVal
         #Log("set datasource("+str(row)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
         self.RefreshWxGridFromDatasource()
@@ -950,7 +933,7 @@ class DataGrid():
         top, left, bottom, right=self.LocateSelection()
         for irow in range(top, bottom+1):
             for icol in range (left, right+1):
-                self.Datasource.SetDataVal(irow, icol, "")
+                self.Datasource[irow][icol]=""
         self.RefreshWxGridFromDatasource()
         event.Skip()
 
