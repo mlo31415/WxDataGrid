@@ -178,6 +178,7 @@ class GridDataSource():
         self._colDefs: ColDefinitionsList=ColDefinitionsList([])
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
         self._gridDataRowClass: GridDataRowClass=None
+        # self.Rows must be supplied by the derived class
 
     def Signature(self) -> int:
         sum=0
