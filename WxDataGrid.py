@@ -181,10 +181,7 @@ class GridDataSource():
         # self.Rows must be supplied by the derived class
 
     def Signature(self) -> int:
-        sum=0
-        for row in self.Rows:
-            sum+=row.Signature()
-        return sum
+        return sum([hash(x)*(i+1) for i, x in enumerate(self.Rows)])
 
     @property
     def Element(self):
@@ -264,7 +261,11 @@ class DataGrid():
 
 
     def Signature(self) -> int:
-        return hash(self._grid)+self._datasource.Signature()
+        h=0
+        for i in range(self._grid.NumberRows):
+            for j in range(self._grid.NumberCols):
+                h+=hash(self._grid.GetCellValue(i, j))
+        return h
 
     # --------------------------------------------------------
     def AllowCellEdit(self, irow: int, icol: int) -> None:
@@ -715,7 +716,6 @@ class DataGrid():
         self.ColorCellByValue(row, col)
         self.RefreshWxGridFromDatasource()
         self.AutoSizeColumns()
-        #self.EvtHandlerEnabled=True
 
     # ------------------
     def OnGridEditorShown(self, event):
@@ -802,6 +802,7 @@ class DataGrid():
             left=right=self._grid.GridCursorCol
             top=bottom=self._grid.GridCursorRow
         return top, left, bottom, right
+
 
     def HasSelection(self) -> bool:        # Grid
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
