@@ -916,7 +916,7 @@ class DataGrid():
         if event.KeyCode == 308:                    # cntl
             self.cntlDown=False
             print("cntlDown=False")
-        event.Skip()
+#        event.Skip()
 
     #------------------
     # Copy the selected cells into the clipboard object.
@@ -925,7 +925,7 @@ class DataGrid():
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
         self.RefreshWxGridFromDatasource()
-        event.Skip()
+#        event.Skip()
 
     #------------------
     # Paste the cells on the clipboard into the grid at the click location
@@ -933,7 +933,7 @@ class DataGrid():
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
         self.RefreshWxGridFromDatasource()
-        event.Skip()
+#        event.Skip()
 
     def OnPopupClearSelection(self, event):
         top, left, bottom, right=self.LocateSelection()
@@ -941,7 +941,7 @@ class DataGrid():
             for icol in range (left, right+1):
                 self.Datasource[irow][icol]=""
         self.RefreshWxGridFromDatasource()
-        event.Skip()
+#        event.Skip()
 
 
     # Delete the selected columns
