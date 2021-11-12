@@ -984,7 +984,7 @@ class DataGrid():
                 return
 
         for row in self.Datasource.Rows:
-            row._cells=row._cells[:icol]+[""]+row._cells[icol:]
+            row._cells=row._cells[:icol+1]+[""]+row._cells[icol+1:]
         self.Datasource.ColDefs=self.Datasource.ColDefs[:icol+1]+ColDefinitionsList([ColDefinition(name)])+self.Datasource.ColDefs[icol+1:]
         self.RefreshWxGridFromDatasource()
 
