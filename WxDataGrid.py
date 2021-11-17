@@ -340,20 +340,17 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Insert one or more empty rows in the data source.
-    # irow and everything after it will be shifted later to make room for the new rows
-    # Expand the grid, also, but don't bother to repopulate it as a later RefreshWindow will take care of that
-    def InsertEmptyRows(self, irow: int, nrows: int) -> None:        # Grid
-        self._grid.InsertRows(irow, nrows)  # Expand the grid
-        # Append nrows at the end, them move the displaced rows to later
-        oldnumrows=self.Datasource.NumRows
-        self.Datasource.Rows.extend([self.Datasource.Element() for _ in range(nrows)])
-        self.MoveRows(irow, oldnumrows-irow, irow+nrows)
+    # Then refresh the grid
+    def InsertEmptyRows(self, irow: int, nrows: int) -> None:        # DataGrid
+        self.Datasource.InsertEmptyRows(irow, nrows)    # Insert the requisite number of rows at irow
 
         # Now update the editable status of non-editable columns
         # All row numbers >= irow are incremented by nrows
         for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
             if row >= irow:
                 self.Datasource.AllowCellEdits[i]=(row+nrows, col)
+
+        self.RefreshWxGridFromDatasource()
 
     # --------------------------------------------------------
     def DeleteRows(self, irow: int, numrows: int=1):        # DataGrid
@@ -975,6 +972,7 @@ class DataGrid():
         del self.Datasource.Rows[top:bottom+1]
         self._grid.ClearSelection()
         self.RefreshWxGridFromDatasource()
+
 
     def OnPopupRenameCol(self, event):        # DataGrid
         v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
