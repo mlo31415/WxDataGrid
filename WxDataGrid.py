@@ -846,7 +846,7 @@ class DataGrid():
             bottom=max(bottom, b)
             right=max(right, r)
 
-        print(f"SelectionBoundingBox{top=}  {left=}  {bottom=}  {right=}")
+        print(f"SelectionBoundingBox: {top=}  {left=}  {bottom=}  {right=}")
         return top, left, bottom, right
 
     # Take the existing selected cells and extend the selection to the full rows
