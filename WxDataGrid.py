@@ -976,7 +976,8 @@ class DataGrid():
             self.Datasource.ColDefs[icol].Name=v
             self.RefreshWxGridFromDatasource()
 
-    def InsertColumn(self, icol: int, name: str="") -> None:        # DataGrid
+
+    def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:        # DataGrid
         if name == "":
             name=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
             if name is None or len(name.strip()) == 0:
@@ -988,14 +989,12 @@ class DataGrid():
         self.Datasource.ColDefs=self.Datasource.ColDefs[:icol+1]+ColDefinitionsList([ColDefinition(name)])+self.Datasource.ColDefs[icol+1:]
         self.RefreshWxGridFromDatasource()
 
+
     def OnPopupInsertColLeft(self, event):        # DataGrid
-        self.InsertColumn(self.clickedColumn)
+        self.InsertColumnMaybeQuery(self.clickedColumn)
 
     def OnPopupInsertColRight(self, event):        # DataGrid
-        self.InsertColumn(self.clickedColumn+1)
-
-    def OnPopupExtractScanner(self, event):        # DataGrid
-        event.Skip()
+        self.InsertColumnMaybeQuery(self.clickedColumn+1)
 
     # ------------------
     def HideRowLabels(self) -> None:        # DataGrid
