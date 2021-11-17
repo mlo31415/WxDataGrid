@@ -510,9 +510,8 @@ class DataGrid():
 
         self.SetColHeaders(self._datasource.ColDefs)
 
-        # Add more rows if needed
-        if self._datasource.NumRows > self._grid.NumberRows:
-            self.AppendEmptyRows(self._datasource.NumRows-self._grid.NumberRows)
+        # Put in the requisite rows
+        self._grid.AppendRows(self._datasource.NumRows)
 
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
