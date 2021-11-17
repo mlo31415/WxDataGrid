@@ -460,7 +460,7 @@ class DataGrid():
         # Special handling for URLs: we add an underline and paint the text blue
         if self._datasource.ColDefs[icol].Type == "url":
             font=self._grid.GetCellFont(irow, icol)
-            if val is not None and val != "" and len(self._datasource.Rows[irow].URL) > 0:
+            if val is not None and val != "" and len(self._datasource.Rows[irow][icol]) > 0:
                 self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.MakeUnderlined()
                 self._grid.SetCellFont(irow, icol, font)
