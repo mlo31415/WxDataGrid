@@ -238,6 +238,10 @@ class GridDataSource():
     def Rows(self, rows: list[GridDataRowClass]) -> None:
         pass
 
+    @abstractmethod
+    def InsertEmptyRows(self, index: int, num: int=1) -> None:
+        pass
+
     @property
     def CanAddColumns(self) -> bool:
         return False            # Override this if adding columns is allowed
@@ -333,10 +337,6 @@ class DataGrid():
     # --------------------------------------------------------
     def AppendRows(self, rows: int) -> None:        # DataGrid
         assert False
-
-    # --------------------------------------------------------
-    def AppendEmptyRows(self, nrows: int) -> None:        # Grid
-        self._grid.AppendRows(nrows)
 
     # --------------------------------------------------------
     # Insert one or more empty rows in the data source.
