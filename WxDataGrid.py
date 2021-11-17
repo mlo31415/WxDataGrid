@@ -171,6 +171,13 @@ class GridDataRowClass:
     def append(self, val):
         pass
 
+    # May need to be overridden in derived class if non-text cols exist
+    def IsText(self) -> bool:
+        return True
+    def IsLink(self) -> bool:
+        return False
+
+
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
 
