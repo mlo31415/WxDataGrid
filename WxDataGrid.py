@@ -530,7 +530,12 @@ class DataGrid():
                 self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
             for icol in range(len(self._datasource.ColDefs)):
-                self._grid.SetCellValue(irow, icol, str(self._datasource[irow][icol]))
+                val=self._datasource[irow][icol]
+                if val is None:
+                    val=""
+                else:
+                    val=str(val)
+                self._grid.SetCellValue(irow, icol, val)
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
