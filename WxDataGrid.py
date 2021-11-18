@@ -245,7 +245,7 @@ class GridDataSource():
         return False            # Override this if editing the column headers is allowed
 
     @property
-    def SpecialTextColor(self) -> Optional[Color]:
+    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?
         return None
     @SpecialTextColor.setter
     def SpecialTextColor(self, val: Optional[Color]) -> None:
