@@ -497,7 +497,7 @@ class DataGrid():
         #self.EvtHandlerEnabled=False
         self._grid.ClearGrid()
         # if self._dataGrid.NumberRows > self._datasource.NumRows:
-        #     # This is to get rid of any trailling formatted rows
+        #     # This is to get rid of any trailing formatted rows
         #     self._dataGrid.DeleteRows(self._datasource.NumRows, self._dataGrid.NumberRows-self._datasource.NumRows)
         #     self._dataGrid.AppendRows(self._dataGrid.NumberRows-self._datasource.NumRows)
         #     #TODO: Need to decide if we're going to leave any empty rows
@@ -512,7 +512,7 @@ class DataGrid():
             if self._datasource.Rows[irow].IsTextRow:
                 self._grid.SetCellSize(irow, 0, 1, self.NumCols)   # Make text rows all one cell
 
-            elif self._datasource.Rows[irow].IsLinkRow:    # If a grid allows IsLink to be set, its Datasource must have a column labelled "Display Name"
+            elif self._datasource.Rows[irow].IsLinkRow:    # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
                 # Locate the "Display Name" column
                 if not "Display Name" in self.Datasource.ColHeaders:
                     assert False  # This should never happen
