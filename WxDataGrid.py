@@ -158,7 +158,7 @@ class Selection():
             raise "self.selectedCells exception"
 
 
-    def printSelection(self, label: str):
+    def Print(self, label: str):
         for block in self.selectedBlocks:
             print(f"{label}: selected block({block.TopLeft}, {block.BottomRight})")
         selected=self.selectedCols
