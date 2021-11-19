@@ -134,6 +134,39 @@ class Color:
      Black=wx.Colour(0, 0, 0)
 
 
+# A class to store and restore a selection
+class Selection():
+    def __init__(self, grid: wx.grid.Grid):
+        self.selectedBlocks=grid.GetSelectedBlocks()
+        self.selectedCols=grid.GetSelectedCols()
+        self.selectedRows=grid.GetSelectedRows()
+        self.selectedCells=grid.GetSelectedCells()
+
+
+    def Restore(self, grid: wx.grid.Grid):
+        grid.ClearSelection()
+        for row in self.selectedRows:
+            grid.SelectRow(row, addToSelected=True)
+        for col in self.selectedCols:
+            grid.SelectCol(col, addToSelected=True)
+        # The first two are mutually exclusive, so we can select without preserving previous selections.
+        # But all these remaining selections have to be additive
+        for block in self.selectedBlocks:
+            grid.SelectBlock(block.TopLeft, block.BottomRight, True)
+        # I don't know how to deal with this right now...
+        assert not self.selectedCells
+
+
+    def printSelection(self, label: str):
+        for block in self.selectedBlocks:
+            print(f"{label}: selected block({block.TopLeft}, {block.BottomRight})")
+        selected=self.selectedCols
+        print(f"{label}: selected cols: {selected}")
+        selected=self.selectedRows
+        print(f"{label}: selected rows: {selected}")
+        for cell in self.selectedCells:
+            print(f"{label}: selected cell({cell.x}, {cell.y})")
+
 
 # An abstract class defining a row  of the GridDataSource
 class GridDataRowClass:
@@ -243,6 +276,10 @@ class GridDataSource():
     @property
     def CanEditColumnHeaders(self) -> bool:
         return False            # Override this if editing the column headers is allowed
+
+    @property
+    def CanMoveColumns(self) -> bool:
+        return True             # Override if columns can't be moved
 
     @property
     def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?
@@ -494,7 +531,8 @@ class DataGrid():
 
     # ------------------
     def RefreshWxGridFromDatasource(self):        # DataGrid
-        #self.EvtHandlerEnabled=False
+        selection=Selection(self._grid)
+
         self._grid.ClearGrid()
         # if self._dataGrid.NumberRows > self._datasource.NumRows:
         #     # This is to get rid of any trailing formatted rows
@@ -537,6 +575,8 @@ class DataGrid():
         rows=self.GetSelectedRowRange()
         if rows is not None:
             self._grid.MakeCellVisible(rows[0], 0)  #TODO: What does this do?
+
+        selection.Restore(self._grid)
 
 
     #--------------------------------------------------------
@@ -840,7 +880,6 @@ class DataGrid():
             bottom=max(bottom, b)
             right=max(right, r)
 
-        print(f"SelectionBoundingBox: {top=}  {left=}  {bottom=}  {right=}")
         return top, left, bottom, right
 
     # Take the existing selected cells and extend the selection to the full rows
@@ -918,7 +957,7 @@ class DataGrid():
         if event.KeyCode == 308:                    # cntl
             self.cntlDown=False
             print("cntlDown=False")
-#        event.Skip()
+
 
     #------------------
     # Copy the selected cells into the clipboard object.
