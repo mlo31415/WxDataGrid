@@ -154,7 +154,8 @@ class Selection():
         for block in self.selectedBlocks:
             grid.SelectBlock(block.TopLeft, block.BottomRight, True)
         # I don't know how to deal with this right now...
-        assert not self.selectedCells
+        if self.selectedCells:
+            raise "self.selectedCells exception"
 
 
     def printSelection(self, label: str):
