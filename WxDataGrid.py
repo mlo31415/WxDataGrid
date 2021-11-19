@@ -192,6 +192,9 @@ class GridDataRowClass:
     @property
     def IsTextRow(self) -> bool:
         return False            # Override only if needed
+    @IsTextRow.setter
+    def IsTextRow(self, val: bool) -> None:
+        assert False
 
     @property
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
