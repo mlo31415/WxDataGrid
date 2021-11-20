@@ -407,6 +407,20 @@ class DataGrid():
         self.Datasource.AllowCellEdits=[x for x in self.Datasource.AllowCellEdits if x[0] != -1]  # Get rid of the tagged entries
 
 
+    # Scroll so as to make as many as possible of the rows visible
+    def MakeRowsVisible(self, rows: list[int]) -> None:
+        # Find the bounding rows
+        low=min(rows)
+        high=max(rows)
+
+        # If either is not visible, make it visible
+        # Note that this can't deal with the too many rows for the window case
+        if not self._grid.IsVisible(low, 1):
+            self._grid.MakeCellVisible(low, 1)
+        if not self._grid.IsVisible(high, 1):
+            self._grid.MakeCellVisible(high, 1)
+
+
     # --------------------------------------------------------
     def AppendEmptyCols(self, ncols: int) -> None:        # DataGrid
         self._grid.AppendCols(ncols)
