@@ -155,7 +155,7 @@ class Selection():
             grid.SelectBlock(block.TopLeft, block.BottomRight, True)
         # I don't know how to deal with this right now...
         if self.selectedCells:
-            raise "self.selectedCells exception"
+            print("self.selectedCells exception")
 
 
     def Print(self, label: str):
@@ -537,6 +537,11 @@ class DataGrid():
     def RefreshWxGridFromDatasource(self):        # DataGrid
         selection=Selection(self._grid)
 
+        # Record the visible lines so we can make them visible again later
+        visible=[i for i in range(self._grid.NumberRows) if self._grid.IsVisible(i, 1, wholeCellVisible=True)]
+
+        scroll=self._grid.ScrollLineX
+
         self._grid.ClearGrid()
         # if self._dataGrid.NumberRows > self._datasource.NumRows:
         #     # This is to get rid of any trailing formatted rows
@@ -576,11 +581,10 @@ class DataGrid():
         self.ColorCellsByValue()
         self.AutoSizeColumns()
 
-        rows=self.GetSelectedRowRange()
-        if rows is not None:
-            self._grid.MakeCellVisible(rows[0], 0)  #TODO: What does this do?
-
         selection.Restore(self._grid)
+        # Make the lines which were visible before we messed with things visible again
+        self._grid.MakeCellVisible(min(visible), 1)
+        self._grid.MakeCellVisible(max(visible), 1)
 
 
     #--------------------------------------------------------
