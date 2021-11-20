@@ -623,7 +623,7 @@ class DataGrid():
         self._datasource.Rows=rows
 
         tpermuter=i1+i3+i2+i4
-        permuter=[-1]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
+        permuter=[-1]*len(tpermuter)     # This next bit of code inverts the permuter into its anti-permuter. (There ought to be a more elegant way to generate it!)
         for i, r in enumerate(tpermuter):
             permuter[r]=i
 
@@ -636,6 +636,7 @@ class DataGrid():
             except:
                 pass
         # Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+
 
     #--------------------------------------------------------
     # Move a block of rows within the data source
