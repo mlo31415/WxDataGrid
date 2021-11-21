@@ -24,6 +24,11 @@ class ColDefinition:
             return self.preferred
         return self.Name
 
+    def Signature(self) -> int:     # ColDefinition
+        return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self.preferred)
+
+
+
 @dataclass
 class ColDefinitionsList:
     List: list[ColDefinition]
@@ -98,6 +103,8 @@ class ColDefinitionsList:
 
         raise KeyError
 
+    def Signature(self) -> int:      # ColDefinitionsList
+        return sum((i+1)*x.Signature() for i, x in enumerate(self.List))
 
     def __len__(self) -> int:
         return len(self.List)
@@ -172,6 +179,7 @@ class Selection():
 # An abstract class defining a row  of the GridDataSource
 class GridDataRowClass:
 
+    # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
     @abstractmethod
     def Signature(self) -> int:
         return 0
@@ -218,8 +226,6 @@ class GridDataSource():
         self._gridDataRowClass: GridDataRowClass=None
         # self.Rows must be supplied by the derived class
 
-    def Signature(self) -> int:
-        return sum([hash(x)*(i+1) for i, x in enumerate(self.Rows)])
 
     @property
     def Element(self):
@@ -305,13 +311,6 @@ class DataGrid():
         self.clickedColumn: Optional[int]=None
         self.clickedRow: Optional[int]=None
 
-
-    def Signature(self) -> int:        # DataGrid
-        h=0
-        for i in range(self._grid.NumberRows):
-            for j in range(self._grid.NumberCols):
-                h+=hash(self._grid.GetCellValue(i, j))
-        return h
 
     # --------------------------------------------------------
     def AllowCellEdit(self, irow: int, icol: int) -> None:        # DataGrid
