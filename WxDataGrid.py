@@ -34,21 +34,21 @@ class ColDefinitionsList:
     List: list[ColDefinition]
 
     # Implement 'in' as in "name" in ColDefinitionsList
-    def __contains__(self, val: str) -> bool:
+    def __contains__(self, val: str) -> bool:       # ColDefinitionsList
         return any([x.Name == val or x.preferred == val for x in self.List])
     #--------------------------
     # Look up the index of a ColDefinition by name
-    def __index__(self, val: str) -> int:
+    def __index__(self, val: str) -> int:       # ColDefinitionsList
         return self.index(val)
 
-    def index(self, val: str) -> int:
+    def index(self, val: str) -> int:       # ColDefinitionsList
         if val not in self: # Calls __contains__
             raise IndexError
         return [x.Name == val or x.preferred == val for x in self.List].index(True)
 
     # --------------------------
     # Index can be a name or a list index
-    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:
+    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:       # ColDefinitionsList
         if type(index) is str:     # The name of the column
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
@@ -60,7 +60,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __delitem__(self, index: Union[str, int, slice]) -> None:
+    def __delitem__(self, index: Union[str, int, slice]) -> None:       # ColDefinitionsList
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -79,7 +79,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:
+    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:       # ColDefinitionsList
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -106,20 +106,21 @@ class ColDefinitionsList:
     def Signature(self) -> int:      # ColDefinitionsList
         return sum((i+1)*x.Signature() for i, x in enumerate(self.List))
 
-    def __len__(self) -> int:
+
+    def __len__(self) -> int:       # ColDefinitionsList
         return len(self.List)
 
-    def append(self, val: ColDefinition):
+    def append(self, val: ColDefinition):       # ColDefinitionsList
         self.List.append(val)
 
-    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:
+    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       # ColDefinitionsList
         return ColDefinitionsList(self.List+val.List)
 
-    def __iter__(self):
+    def __iter__(self):       # ColDefinitionsList
         self._it=0
         return self
 
-    def __next__(self):
+    def __next__(self):       # ColDefinitionsList
         if self._it == len(self.List):
             raise StopIteration
         val=self.List[self._it]
@@ -150,7 +151,7 @@ class Selection():
         self.selectedCells=grid.GetSelectedCells()
 
 
-    def Restore(self, grid: wx.grid.Grid):
+    def Restore(self, grid: wx.grid.Grid):      # Selection
         grid.ClearSelection()
         for row in self.selectedRows:
             grid.SelectRow(row, addToSelected=True)
@@ -165,7 +166,7 @@ class Selection():
             print("self.selectedCells exception")
 
 
-    def Print(self, label: str):
+    def Print(self, label: str):      # Selection
         for block in self.selectedBlocks:
             print(f"{label}: selected block({block.TopLeft}, {block.BottomRight})")
         selected=self.selectedCols
@@ -181,31 +182,31 @@ class GridDataRowClass:
 
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
     @abstractmethod
-    def Signature(self) -> int:
+    def Signature(self) -> int:     # GridDataRowClass (abstract class)
         return 0
 
     # Get or set a value by name or column number in the grid
     @abstractmethod
-    def __getitem__(self, index: Union[int, slice]) -> str:
+    def __getitem__(self, index: Union[int, slice]) -> str:     # GridDataRowClass (abstract class)
         pass
 
     @abstractmethod
-    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:
+    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:     # GridDataRowClass (abstract class)
         pass
 
     @property
-    def IsLinkRow(self) -> bool:
+    def IsLinkRow(self) -> bool:     # GridDataRowClass (abstract class)
         return False            # Override only if needed
 
     @property
-    def IsTextRow(self) -> bool:
+    def IsTextRow(self) -> bool:     # GridDataRowClass (abstract class)
         return False            # Override only if needed
     @IsTextRow.setter
     def IsTextRow(self, val: bool) -> None:
         assert False
 
     @property
-    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible
+    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     # GridDataRowClass (abstract class)
         return True
     @abstractmethod
     def DelCol(self, icol) -> None:    # This *must* be implemented in the derived class because the data is so various
@@ -213,7 +214,7 @@ class GridDataRowClass:
 
     # This needs to be implemented only if the datasource allows the addition of new columns
     @abstractmethod
-    def append(self, val):
+    def append(self, val):     # GridDataRowClass (abstract class)
         pass
 
 
@@ -228,47 +229,47 @@ class GridDataSource():
 
 
     @property
-    def Element(self):
+    def Element(self):     # GridDataSource() abstract class
         return self._gridDataRowClass
 
     @property
-    def ColDefs(self) -> ColDefinitionsList:
+    def ColDefs(self) -> ColDefinitionsList:     # GridDataSource() abstract class
         return self._colDefs
     @ColDefs.setter
     def ColDefs(self, cds: ColDefinitionsList):
         self._colDefs=cds
 
     @property
-    def ColHeaders(self) -> list[str]:
+    def ColHeaders(self) -> list[str]:     # GridDataSource() abstract class
         return [l.Name for l in self.ColDefs]
 
     @property
-    def AllowCellEdits(self) -> list[tuple[int, int]]:
+    def AllowCellEdits(self) -> list[tuple[int, int]]:     # GridDataSource() abstract class
         return self._allowCellEdits
     @AllowCellEdits.setter
     def AllowCellEdits(self, val: list[tuple[int, int]]) -> None:
         self._allowCellEdits=val
 
     @property
-    def NumCols(self) -> int:
+    def NumCols(self) -> int:     # GridDataSource() abstract class
         return len(self.ColDefs)
 
     @property
     @abstractmethod
-    def NumRows(self) -> int:
+    def NumRows(self) -> int:     # GridDataSource() abstract class
         pass
 
     @abstractmethod
-    def __getitem__(self, index: int) -> GridDataRowClass:
+    def __getitem__(self, index: int) -> GridDataRowClass:     # GridDataSource() abstract class
         pass
 
     @abstractmethod
-    def __setitem__(self, index: int, val: GridDataRowClass) -> None:
+    def __setitem__(self, index: int, val: GridDataRowClass) -> None:     # GridDataSource() abstract class
         pass
 
     @property
     @abstractmethod
-    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.
+    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.     # GridDataSource() abstract class
         pass
     @Rows.setter
     @abstractmethod
@@ -276,23 +277,23 @@ class GridDataSource():
         pass
 
     @abstractmethod
-    def InsertEmptyRows(self, index: int, num: int=1) -> None:
+    def InsertEmptyRows(self, index: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
 
     @property
-    def CanAddColumns(self) -> bool:
+    def CanAddColumns(self) -> bool:     # GridDataSource() abstract class
         return False            # Override this if adding columns is allowed
 
     @property
-    def CanEditColumnHeaders(self) -> bool:
+    def CanEditColumnHeaders(self) -> bool:     # GridDataSource() abstract class
         return False            # Override this if editing the column headers is allowed
 
     @property
-    def CanMoveColumns(self) -> bool:
+    def CanMoveColumns(self) -> bool:     # GridDataSource() abstract class
         return True             # Override if columns can't be moved
 
     @property
-    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?
+    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?     # GridDataSource() abstract class
         return None
     @SpecialTextColor.setter
     def SpecialTextColor(self, val: Optional[Color]) -> None:
@@ -357,10 +358,10 @@ class DataGrid():
 
     # --------------------------------------------------------
     @property
-    def Datasource(self) -> GridDataSource:
+    def Datasource(self) -> GridDataSource:         # DataGrid
         return self._datasource
     @Datasource.setter
-    def Datasource(self, val: GridDataSource):        # DataGrid
+    def Datasource(self, val: GridDataSource):
         self._datasource=val
 
     # --------------------------------------------------------
@@ -407,7 +408,7 @@ class DataGrid():
 
 
     # Scroll so as to make as many as possible of the rows visible
-    def MakeRowsVisible(self, rows: list[int]) -> None:
+    def MakeRowsVisible(self, rows: list[int]) -> None:         # DataGrid
         # Find the bounding rows
         low=min(rows)
         high=max(rows)
