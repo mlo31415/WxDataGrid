@@ -458,23 +458,24 @@ class DataGrid():
         if icol >= len(self._datasource.ColDefs):
             return
 
-        # Row overflow is permitted and extra rows (rows in the grid, but not in the datasource) are colored generically
         if irow >= self.Datasource.NumRows:
             # These are trailing rows and should get default formatting
+            # Row overflow is permitted and extra rows (rows in the grid, but not in the datasource) are colored generically
             self._grid.SetCellSize(irow, icol, 1, 1)  # Eliminate any spans
             self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
             if self._datasource.ColDefs[icol].IsEditable == "no" or self._datasource.ColDefs[icol].IsEditable == "maybe":
                 self.SetCellBackgroundColor(irow, icol, Color.LightGray)
             return
 
-        val=self._grid.GetCellValue(irow, icol)
-
+        # We're now in a row that includes data
         # First turn off any special formatting
         self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
         self.SetCellBackgroundColor(irow, icol, Color.White)
         self._grid.SetCellTextColour(irow, icol, Color.Black)
 
-        # If the row is a text row and if there's a special text color, color it thus
+        # If the row is a text row and if there's a special text color
+        # The special text color can be a color, which we then use to color the text or
+        # It can be anything else, in which case we BOLD the text.
         if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow and self._datasource.SpecialTextColor is not None:
             if self._datasource.SpecialTextColor is not None:
                 if type(self._datasource.SpecialTextColor) is Color:
@@ -559,16 +560,13 @@ class DataGrid():
         scroll=self._grid.ScrollLineX
 
         self._grid.ClearGrid()
-        # if self._dataGrid.NumberRows > self._datasource.NumRows:
-        #     # This is to get rid of any trailing formatted rows
-        #     self._dataGrid.DeleteRows(self._datasource.NumRows, self._dataGrid.NumberRows-self._datasource.NumRows)
-        #     self._dataGrid.AppendRows(self._dataGrid.NumberRows-self._datasource.NumRows)
-        #     #TODO: Need to decide if we're going to leave any empty rows
+        if self._grid.NumberRows > 0:
+            self._grid.DeleteRows(0, self._grid.NumberRows)
 
         self.SetColHeaders(self._datasource.ColDefs)
 
-        # Put in the requisite rows
-        self._grid.AppendRows(self._datasource.NumRows)
+        # Put in the requisite rows plus 5 spares
+        self._grid.AppendRows(self._datasource.NumRows+5)
 
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
