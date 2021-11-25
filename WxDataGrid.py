@@ -516,7 +516,7 @@ class DataGrid():
         if self._datasource.ColDefs[icol].Type == "url":
             val=self._grid.GetCellValue(irow, icol)
             font=self._grid.GetCellFont(irow, icol)
-            if val is not None and val != "" and len(self._datasource.Rows[irow][icol]) > 0:
+            if val is not None and val != "" and self._datasource.Rows[irow].URL:
                 self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.MakeUnderlined()
                 self._grid.SetCellFont(irow, icol, font)
