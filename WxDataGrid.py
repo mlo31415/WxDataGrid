@@ -501,6 +501,7 @@ class DataGrid():
         else:
             # If it *is* editable or potentially editable, then color it according to its value
             # We skip testing for "str"-type columns since anything at all is OK in a str column
+            val=self._grid.GetCellValue(irow, icol)
             if self._datasource.ColDefs[icol].Type == "int":
                 if val is not None and val != "" and not IsInt(val):
                     self.SetCellBackgroundColor(irow, icol, Color.Pink)
@@ -513,13 +514,14 @@ class DataGrid():
 
         # Special handling for URLs: we add an underline and paint the text blue
         if self._datasource.ColDefs[icol].Type == "url":
+            val=self._grid.GetCellValue(irow, icol)
             font=self._grid.GetCellFont(irow, icol)
             if val is not None and val != "" and len(self._datasource.Rows[irow][icol]) > 0:
                 self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.MakeUnderlined()
                 self._grid.SetCellFont(irow, icol, font)
             else:
-                #self._dataGrid.SetCellTextColour(irow, icol, Color.Blue)
+                # self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.SetUnderlined(False)
                 self._grid.SetCellFont(irow, icol, font)
 
