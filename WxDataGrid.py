@@ -277,7 +277,7 @@ class GridDataSource():
         pass
 
     @abstractmethod
-    def InsertEmptyRows(self, index: int, num: int=1) -> None:     # GridDataSource() abstract class
+    def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
 
     @property
@@ -370,8 +370,8 @@ class DataGrid():
         return self._grid
 
     # --------------------------------------------------------
-    def AppendRows(self, rows: int) -> None:        # DataGrid
-        assert False
+    def AppendRows(self, nrows: int) -> None:        # DataGrid
+        self.ExpandDataSourceToInclude(self.NumRows+nrows)
 
     # --------------------------------------------------------
     # Insert one or more empty rows in the data source.
@@ -577,9 +577,9 @@ class DataGrid():
 
             elif self._datasource.Rows[irow].IsLinkRow:    # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
                 # Locate the "Display Name" column
-                if not "Display Name" in self.Datasource.ColHeaders:
+                if not "Display Name" in self._datasource.ColHeaders:
                     assert False  # This should never happen
-                colnum=self.Datasource.ColHeaders.index("Display Name")
+                colnum=self._datasource.ColHeaders.index("Display Name")
                 self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
                 self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
 
@@ -730,15 +730,17 @@ class DataGrid():
 
         # Define the bounds of the paste-to box
         pasteTop=top
-        pasteBottom=top+len(self.clipboard)
+        pasteBottom=top+len(self.clipboard)-1
         pasteLeft=left
-        pasteRight=left+len(self.clipboard[0])
+        pasteRight=left+len(self.clipboard[0])-1
 
         # Does the paste-to box extend beyond the end of the available rows?  If so, extend the available rows.
         num=pasteBottom-len(self._datasource.Rows)+1
         if num > 0:
-            for i in range(num):
-                self._datasource.Rows.append(self._datasource.Element())
+            self.Datasource.InsertEmptyRows(self.Datasource.NumRows, num)
+        # Refresh the datagrid from the Datasource to make it also bigger
+        self.RefreshWxGridFromDatasource()
+
         # Copy the cells from the clipboard to the grid in lstData.
         for i, row in enumerate(self.clipboard, start=pasteTop):
             for j, cellval in enumerate(row, start=pasteLeft):
@@ -793,10 +795,8 @@ class DataGrid():
             event.Veto()
             return
         if self.Datasource.ColDefs[icol].IsEditable == "maybe":
-            for it in self.Datasource.AllowCellEdits:
-                if (irow, icol) == it:
-                    return
-            event.Veto()
+            if (irow, icol) not in self.Datasource.AllowCellEdits:
+                event.Veto()
 
     # ------------------
     def OnGridLabelLeftClick(self, event):        # DataGrid
@@ -1059,10 +1059,10 @@ class DataGrid():
 
 
     def OnPopupInsertColLeft(self, event):        # DataGrid
-        self.InsertColumnMaybeQuery(self.clickedColumn)
+        self._dataGrid.InsertColumnMaybeQuery(self.clickedColumn)
 
     def OnPopupInsertColRight(self, event):        # DataGrid
-        self.InsertColumnMaybeQuery(self.clickedColumn+1)
+        self._dataGrid.InsertColumnMaybeQuery(self.clickedColumn+1)
 
     # ------------------
     def HideRowLabels(self) -> None:        # DataGrid
