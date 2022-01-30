@@ -753,8 +753,8 @@ class DataGrid():
         assert irow >= 0 and icol >= 0
 
         # Add new rows if needed
-        while irow >= len(self._datasource.Rows):
-            self._datasource.Rows.append(self._datasource.Element())
+        while irow >= self._datasource.NumRows:
+            self._datasource.InsertEmptyRows(self._datasource.NumRows, self._datasource.NumRows-irow+1)
 
         # And add new columns
         # Many data sources do not allow expanding the number of columns, so check that first
