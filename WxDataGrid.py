@@ -276,6 +276,9 @@ class GridDataSource():
     def Rows(self, rows: list[GridDataRowClass]) -> None:
         pass
 
+    def AppendEmptyRows(self, num: int = 1):
+        self.InsertEmptyRows(self.NumRows, num)
+
     @abstractmethod
     def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
@@ -763,7 +766,7 @@ class DataGrid():
             while icol >= len(self._datasource.ColDefs):
                 self._datasource.ColDefs.append(ColDefinition())
                 for j in range(self._datasource.NumRows):
-                    self._datasource.Rows[j].append("") # Note that append is implemented only when collums can be added
+                    self._datasource.Rows[j].append("") # Note that append is implemented only when columns can be added
 
     #------------------------------------
     # In many even handlers we need to save the click location
