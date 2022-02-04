@@ -780,7 +780,7 @@ class DataGrid():
 
         # Add new rows if needed
         while irow >= self._datasource.NumRows:
-            self._datasource.InsertEmptyRows(self._datasource.NumRows, self._datasource.NumRows-irow+1)
+            self._datasource.InsertEmptyRows(self._datasource.NumRows, irow-self._datasource.NumRows+1)
 
         # And add new columns
         # Many data sources do not allow expanding the number of columns, so check that first
