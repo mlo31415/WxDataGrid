@@ -36,6 +36,7 @@ class ColDefinitionsList:
     # Implement 'in' as in "name" in ColDefinitionsList
     def __contains__(self, val: str) -> bool:       # ColDefinitionsList
         return any([x.Name == val or x.preferred == val for x in self.List])
+
     #--------------------------
     # Look up the index of a ColDefinition by name
     def __index__(self, val: str) -> int:       # ColDefinitionsList
@@ -294,6 +295,28 @@ class GridDataSource():
     @property
     def CanMoveColumns(self) -> bool:     # GridDataSource() abstract class
         return True             # Override if columns can't be moved
+
+    # Fnd the index of a possible header in the column header. -1 in not found
+    def ColHeaderIndex(self, s: str, CaseSensitive=False) -> int:     # GridDataSource() abstract class
+        if CaseSensitive:
+            if s in self.ColHeaders:
+                return self.ColHeaders.index(s)
+        else:
+            temp=[header.lower() for header in self.ColHeaders]
+            if s in temp:
+                return temp.index(s)
+        return -1
+
+    # Insert a new column
+    # And index of -1 appends
+    def InsertColumnHeader(self, index: int, cdef: str | ColDefinition):
+        if type(cdef) is str:
+            c=self._colDefs.index(cdef)
+        c=ColDefinitionsList([cdef])
+        if index >= 0:
+            self._colDefs=self._colDefs[:index]+c+self._colDefs[index:]
+        else:
+            self._colDefs=self._colDefs+c
 
     @property
     def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?     # GridDataSource() abstract class
