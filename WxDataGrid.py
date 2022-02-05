@@ -581,9 +581,9 @@ class DataGrid():
         selection=Selection(self._grid)
 
         # Record the visible lines so we can make them visible again later
-        visible=[]
+        visibleRows=[]
         if self._grid.NumberCols > 0:
-            visible=[i for i in range(self._grid.NumberRows) if self._grid.IsVisible(i, 0, wholeCellVisible=True)]
+            visibleRows=[i for i in range(self._grid.NumberRows) if self._grid.IsVisible(i, 0, wholeCellVisible=True)]
 
         scroll=self._grid.ScrollLineX
 
@@ -625,9 +625,9 @@ class DataGrid():
 
         selection.Restore(self._grid)
         # Make the lines which were visible before we messed with things visible again
-        if visible:
-            self._grid.MakeCellVisible(min(visible), 0)
-            self._grid.MakeCellVisible(max(visible), 0)
+        if visibleRows:
+            self._grid.MakeCellVisible(min(visibleRows), 0)
+            self._grid.MakeCellVisible(max(visibleRows), 0)
 
 
     #--------------------------------------------------------
