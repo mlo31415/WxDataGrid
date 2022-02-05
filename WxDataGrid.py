@@ -357,7 +357,6 @@ class DataGrid():
     # --------------------------------------------------------
     # Get a cell value
     # Note that this does not change the underlying data
-    #def Get(self, row: int, col: int) -> str:
     @abstractmethod
     def __getitem__(self, index: int):        # DataGrid
         return self._grid[index]
