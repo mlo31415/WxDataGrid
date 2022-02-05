@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional, Any
+from typing import Union, Optional
 from dataclasses import dataclass
 from abc import abstractmethod
 
