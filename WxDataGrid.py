@@ -374,7 +374,7 @@ class DataGrid():
         if self._grid.NumberCols > nCols:
             self._grid.DeleteCols(nCols, self._grid.NumberCols-nCols)
         else:
-            self._grid.AppendCols(nCols, nCols-self._grid.NumberCols)
+            self._grid.AppendCols(nCols-self._grid.NumberCols)
 
     # --------------------------------------------------------
     @property
