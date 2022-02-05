@@ -374,7 +374,7 @@ class DataGrid():
         if self._grid.NumberCols > nCols:
             self._grid.DeleteCols(nCols, self._grid.NumberCols-nCols)
         else:
-            self._grid.AppendCols(nCols, self._grid.NumberCols-nCols)
+            self._grid.AppendCols(nCols, nCols-self._grid.NumberCols)
 
     # --------------------------------------------------------
     @property
@@ -453,7 +453,9 @@ class DataGrid():
 
     # --------------------------------------------------------
     def SetColHeaders(self, coldefs: ColDefinitionsList) -> None:        # DataGrid
-        self.NumCols=len(coldefs)   # If necessary, change the grid to match the ColDefs
+        # If necessary, change the grid to match the ColDefs
+        self.NumCols=len(coldefs)
+
         # Add the column headers
         for i, cd in enumerate(coldefs):
             self._grid.SetColLabelValue(i, cd.Preferred)
@@ -1017,7 +1019,7 @@ class DataGrid():
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
         self.RefreshWxGridFromDatasource()
-#        event.Skip()
+
 
     #------------------
     # Paste the cells on the clipboard into the grid at the click location
