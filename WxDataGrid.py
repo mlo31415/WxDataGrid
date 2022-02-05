@@ -775,7 +775,7 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
-    def ExpandDataSourceToInclude(self, irow: int, icol: int) -> None:        # DataGrid
+    def ExpandDataSourceToInclude(self, irow: int, icol: int=0) -> None:        # DataGrid
         assert irow >= 0 and icol >= 0
 
         # Add new rows if needed
