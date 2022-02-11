@@ -578,7 +578,7 @@ class DataGrid():
         return None
 
     # ------------------
-    def RefreshWxGridFromDatasource(self):        # DataGrid
+    def RefreshWxGridFromDatasource(self, IgnoreCurrentGrid=False):        # DataGrid
         selection=Selection(self._grid)
 
         # Record the visible lines so we can make them visible again later
@@ -623,12 +623,14 @@ class DataGrid():
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
+        self._grid.AutoSize()
 
-        selection.Restore(self._grid)
-        # Make the lines which were visible before we messed with things visible again
-        if visibleRows:
-            self._grid.MakeCellVisible(min(visibleRows), 0)
-            self._grid.MakeCellVisible(max(visibleRows), 0)
+        if not IgnoreCurrentGrid:
+            selection.Restore(self._grid)
+            # Make the lines which were visible before we messed with things visible again
+            if visibleRows:
+                self._grid.MakeCellVisible(min(visibleRows), 0)
+                self._grid.MakeCellVisible(max(visibleRows), 0)
 
 
     #--------------------------------------------------------
