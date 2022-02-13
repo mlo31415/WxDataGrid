@@ -30,12 +30,16 @@ class ModalDialogManager():
 # A class to display progress messages
 #       ProgressMessage(parent).Show(message)       # Display a message, creating a popup dialog if needed
 #       ProgressMessage(parent).Close(delay=sec)    # Delay sec seconds and then close the progress message
-class ProgressMessage:
+# It may also be used as:
+#   with ProgressMsg(parent, "message", delay=1 as msg:
+#       ...
+#       ...
+#       etc.
+class ProgressMessage(object):
     _progressMessageDlg: wx.ProgressDialog=None
 
     def __init__(self, parent: Optional[wx.Dialog]) -> None:
         self._parent=parent
-
 
     def Show(self, s: Optional[str], close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
         if ProgressMessage._progressMessageDlg is None:
@@ -67,6 +71,19 @@ class ProgressMessage:
         if self._parent is not None:
             self._parent.SetFocus()
             self._parent.Raise()
+
+class ProgressMsg(object):
+    def __init__(self, parent: Optional[wx.Dialog], message: str, delay: float= 0.5) -> None:
+        self.pm=ProgressMessage(parent)
+        self._parent=parent
+        self.message=message
+        self.delay=delay
+
+    def __enter__(self):
+        self.pm.Show(self.message, delay=self.delay)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.pm.Close()
 
 
 #
