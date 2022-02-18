@@ -623,7 +623,7 @@ class DataGrid():
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
-        self._grid.AutoSize()
+        #self._grid.AutoSize()
 
         if not IgnoreCurrentGrid:
             selection.Restore(self._grid)
