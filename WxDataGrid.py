@@ -538,6 +538,9 @@ class DataGrid():
             elif self._datasource.ColDefs[icol].Type == "date":
                 if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
                     self.SetCellBackgroundColor(irow, icol, Color.Pink)
+            elif self._datasource.ColDefs[icol].Type == "required str":
+                if val is None or len(val) == 0:
+                    self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
         # Special handling for URLs: we add an underline and paint the text blue
         if self._datasource.ColDefs[icol].Type == "url":
