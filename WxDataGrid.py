@@ -299,6 +299,7 @@ class GridDataSource():
     def CanMoveColumns(self) -> bool:     # GridDataSource() abstract class
         return True             # Override if columns can't be moved
 
+
     # Fnd the index of a possible header in the column header. -1 in not found
     def ColHeaderIndex(self, s: str, CaseSensitive=False) -> int:     # GridDataSource() abstract class
         if CaseSensitive:
@@ -1051,15 +1052,14 @@ class DataGrid():
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
         self.RefreshWxGridFromDatasource()
-#        event.Skip()
 
-    def OnPopupClearSelection(self, event):        # DataGrid
-        top, left, bottom, right=self.LocateSelection()
+
+    def OnPopupEraseSelection(self, event):        # DataGrid
+        top, left, bottom, right=self.Datasource.LimitBoxToActuals(self.LocateSelection())
         for irow in range(top, bottom+1):
             for icol in range (left, right+1):
                 self.Datasource[irow][icol]=""
         self.RefreshWxGridFromDatasource()
-#        event.Skip()
 
 
     # Delete the selected columns
