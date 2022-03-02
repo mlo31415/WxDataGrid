@@ -280,6 +280,9 @@ class GridDataSource():
     def AppendEmptyRows(self, num: int = 1):
         self.InsertEmptyRows(self.NumRows, num)
 
+    def IsEmptyRow(self, i: int) -> bool:
+        return not any([cell.strip() != "" for cell in self.Rows[i]])
+
     @abstractmethod
     def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
@@ -543,19 +546,20 @@ class DataGrid():
         else:
             # If it *is* editable or potentially editable, then color it according to its value
             # We skip testing for "str"-type columns since anything at all is OK in a str column
-            val=self._grid.GetCellValue(irow, icol)
-            if self._datasource.ColDefs[icol].Type == "int":
-                if val is not None and val != "" and not IsInt(val):
-                    self.SetCellBackgroundColor(irow, icol, Color.Pink)
-            elif self._datasource.ColDefs[icol].Type == "date range":
-                if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
-                    self.SetCellBackgroundColor(irow, icol, Color.Pink)
-            elif self._datasource.ColDefs[icol].Type == "date":
-                if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
-                    self.SetCellBackgroundColor(irow, icol, Color.Pink)
-            elif self._datasource.ColDefs[icol].Type == "required str":
-                if val is None or len(val) == 0:
-                    self.SetCellBackgroundColor(irow, icol, Color.Pink)
+            if not self._datasource.IsEmptyRow(irow):  # Don't bother filling in colors in completely empty rows
+                val=self._grid.GetCellValue(irow, icol)
+                if self._datasource.ColDefs[icol].Type == "int":
+                    if val is not None and val != "" and not IsInt(val):
+                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                elif self._datasource.ColDefs[icol].Type == "date range":
+                    if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
+                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                elif self._datasource.ColDefs[icol].Type == "date":
+                    if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
+                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                elif self._datasource.ColDefs[icol].Type == "required str":
+                    if val is None or len(val) == 0:
+                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
         # Special handling for URLs: we add an underline and paint the text blue
         if self._datasource.ColDefs[icol].Type == "url":
