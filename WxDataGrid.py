@@ -318,6 +318,21 @@ class GridDataSource():
         else:
             self._colDefs=self._colDefs+c
 
+
+    # Take a box of row/col indexes such as used in a selection: (top, left, bottom, right)
+    # and limit it to the rows and columns actually currently defined
+    def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+        top, left, bottom, right=box
+        if top < 0:
+            top=0
+        if bottom > self.NumRows-1:
+            bottom=self.NumRows-1
+        if right < 0:
+            right=0
+        if left > self.NumCols-1:
+            left=self.NumCols-1
+        return top, left, bottom, right
+
     @property
     def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?     # GridDataSource() abstract class
         return None
