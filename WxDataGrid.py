@@ -222,7 +222,7 @@ class GridDataRowClass:
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
 
-    def __init__(self):
+    def __init__(self):     # GridDataSource() abstract class
         self._colDefs: ColDefinitionsList=ColDefinitionsList([])
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
         self._gridDataRowClass: GridDataRowClass=None
@@ -237,7 +237,7 @@ class GridDataSource():
     def ColDefs(self) -> ColDefinitionsList:     # GridDataSource() abstract class
         return self._colDefs
     @ColDefs.setter
-    def ColDefs(self, cds: ColDefinitionsList):
+    def ColDefs(self, cds: ColDefinitionsList):     # GridDataSource() abstract class
         self._colDefs=cds
 
     @property
@@ -248,7 +248,7 @@ class GridDataSource():
     def AllowCellEdits(self) -> list[tuple[int, int]]:     # GridDataSource() abstract class
         return self._allowCellEdits
     @AllowCellEdits.setter
-    def AllowCellEdits(self, val: list[tuple[int, int]]) -> None:
+    def AllowCellEdits(self, val: list[tuple[int, int]]) -> None:     # GridDataSource() abstract class
         self._allowCellEdits=val
 
     @property
@@ -274,10 +274,10 @@ class GridDataSource():
         pass
     @Rows.setter
     @abstractmethod
-    def Rows(self, rows: list[GridDataRowClass]) -> None:
+    def Rows(self, rows: list[GridDataRowClass]) -> None:     # GridDataSource() abstract class
         pass
 
-    def AppendEmptyRows(self, num: int = 1):
+    def AppendEmptyRows(self, num: int = 1):     # GridDataSource() abstract class
         self.InsertEmptyRows(self.NumRows, num)
 
     def IsEmptyRow(self, i: int) -> bool:
@@ -313,7 +313,7 @@ class GridDataSource():
 
     # Insert a new column
     # And index of -1 appends
-    def InsertColumnHeader(self, index: int, cdef: str | ColDefinition):
+    def InsertColumnHeader(self, index: int, cdef: str | ColDefinition):     # GridDataSource() abstract class
         if type(cdef) is str:
             c=self._colDefs.index(cdef)
         c=ColDefinitionsList([cdef])
@@ -325,7 +325,7 @@ class GridDataSource():
 
     # Take a box of row/col indexes such as used in a selection: (top, left, bottom, right)
     # and limit it to the rows and columns actually currently defined
-    def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:     # GridDataSource() abstract class
         top, left, bottom, right=box
         if top < 0:
             top=0
@@ -341,7 +341,7 @@ class GridDataSource():
     def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?     # GridDataSource() abstract class
         return None
     @SpecialTextColor.setter
-    def SpecialTextColor(self, val: Optional[Color]) -> None:
+    def SpecialTextColor(self, val: Optional[Color]) -> None:     # GridDataSource() abstract class
         return
 
 
