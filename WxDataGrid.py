@@ -218,6 +218,10 @@ class GridDataRowClass:
     def append(self, val):     # GridDataRowClass (abstract class)
         pass
 
+    @abstractmethod
+    def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
+        assert False
+
 
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
@@ -280,7 +284,7 @@ class GridDataSource():
     def AppendEmptyRows(self, num: int = 1):     # GridDataSource() abstract class
         self.InsertEmptyRows(self.NumRows, num)
 
-    def IsEmptyRow(self, i: int) -> bool:
+    def IsEmptyRow(self, i: int) -> bool:     # GridDataSource() abstract class
         return not any([cell.strip() != "" for cell in self.Rows[i]])
 
     @abstractmethod
