@@ -311,8 +311,8 @@ class GridDataSource():
                 return self.ColHeaders.index(s)
         else:
             temp=[header.lower() for header in self.ColHeaders]
-            if s in temp:
-                return temp.index(s)
+            if s.lower() in temp:
+                return temp.index(s.lower())
         return -1
 
     # Insert a new column
