@@ -285,7 +285,7 @@ class GridDataSource():
         self.InsertEmptyRows(self.NumRows, num)
 
     def IsEmptyRow(self, i: int) -> bool:     # GridDataSource() abstract class
-        return not any([cell.strip() != "" for cell in self.Rows[i]])
+        return self.Rows[i].IsEmptyRow()
 
     @abstractmethod
     def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
