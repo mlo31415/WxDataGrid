@@ -1114,10 +1114,10 @@ class DataGrid():
 
 
     def OnPopupInsertColLeft(self, event):        # DataGrid
-        self.InsertColumnMaybeQuery(self.clickedColumn)
+        self.InsertColumnMaybeQuery(self.clickedColumn-1)
 
     def OnPopupInsertColRight(self, event):        # DataGrid
-        self.InsertColumnMaybeQuery(self.clickedColumn+1)
+        self.InsertColumnMaybeQuery(self.clickedColumn)
 
     # ------------------
     def HideRowLabels(self) -> None:        # DataGrid
