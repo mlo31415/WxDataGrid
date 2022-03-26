@@ -1044,6 +1044,7 @@ class DataGrid():
     #------------------
     # Copy the selected cells into the clipboard object.
     def OnPopupCopy(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
@@ -1053,12 +1054,14 @@ class DataGrid():
     #------------------
     # Paste the cells on the clipboard into the grid at the click location
     def OnPopupPaste(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
         self.RefreshWxGridFromDatasource()
 
 
     def OnPopupEraseSelection(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         top, left, bottom, right=self.Datasource.LimitBoxToActuals(self.LocateSelection())
         for irow in range(top, bottom+1):
             for icol in range (left, right+1):
@@ -1068,6 +1071,7 @@ class DataGrid():
 
     # Delete the selected columns
     def DeleteSelectedColumns(self):        # DataGrid
+        self._grid.SaveEditControlValue()
         _, left, _, right=self.SelectionBoundingBox()
         if left == -1 or right == -1:
             del self.Datasource.ColDefs[self.clickedColumn]
@@ -1083,6 +1087,7 @@ class DataGrid():
 
 
     def DeleteSelectedRows(self):        # DataGrid
+        self._grid.SaveEditControlValue()
         top, _, bottom, _=self.SelectionBoundingBox()
         if top == -1 or bottom == -1:
             top=self.clickedRow
@@ -1093,6 +1098,7 @@ class DataGrid():
 
 
     def OnPopupRenameCol(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
         if v is not None:
             icol=self.clickedColumn
@@ -1101,6 +1107,7 @@ class DataGrid():
 
 
     def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:        # DataGrid
+        self._grid.SaveEditControlValue()
         if name == "":
             name=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
             if name is None or len(name.strip()) == 0:
@@ -1114,9 +1121,11 @@ class DataGrid():
 
 
     def OnPopupInsertColLeft(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn-1)
 
     def OnPopupInsertColRight(self, event):        # DataGrid
+        self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn)
 
     # ------------------
