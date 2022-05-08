@@ -6,7 +6,8 @@ from abc import abstractmethod
 import wx
 import wx.grid
 
-from HelpersPackage import IsInt, MessageBoxInput
+from HelpersPackage import IsInt
+from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 
 #================================================================
@@ -1099,7 +1100,7 @@ class DataGrid():
 
     def OnPopupRenameCol(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
-        v=MessageBoxInput("Enter the new column name", ignoredebugger=True)
+        v=MessageBoxInput("Enter the new column name", title="Renaming column", ignoredebugger=True)
         if v is not None:
             icol=self.clickedColumn
             self.Datasource.ColDefs[icol].Name=v
@@ -1109,7 +1110,7 @@ class DataGrid():
     def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:        # DataGrid
         self._grid.SaveEditControlValue()
         if name == "":
-            name=MessageBoxInput("Enter the new column's name", ignoredebugger=True)
+            name=MessageBoxInput("Enter the new column's name", title="Inserting column", ignoredebugger=True)
             if name is None or len(name.strip()) == 0:
                 #event.Skip()
                 return

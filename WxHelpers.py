@@ -101,3 +101,87 @@ def OnCloseHandling(event, needssaving: bool, msg: str) -> bool:
                 return True
 
     return False
+
+
+# -*- coding: utf-8 -*-
+
+###########################################################################
+## Python code generated with wxFormBuilder (version Oct 26 2018)
+## http://www.wxformbuilder.org/
+##
+## PLEASE DO *NOT* EDIT THIS FILE!
+###########################################################################
+
+import wx
+import wx.xrc
+
+###########################################################################
+## Class QueryDialog
+###########################################################################
+
+class QueryDialog ( wx.Dialog ):
+
+	def __init__( self, parent ):
+		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.CLOSE_BOX|wx.DEFAULT_DIALOG_STYLE )
+
+		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+
+		lable = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
+
+		self.label = wx.StaticText( lable.GetStaticBox(), wx.ID_ANY, u"Enter the new column's name", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.label.Wrap( -1 )
+
+		lable.Add( self.label, 0, wx.ALL, 5 )
+
+		self.m_textctl = wx.TextCtrl( lable.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_textctl.SetMinSize( wx.Size( 200,-1 ) )
+
+		lable.Add( self.m_textctl, 0, wx.ALL, 5 )
+
+		fgSizer4 = wx.FlexGridSizer( 0, 2, 0, 0 )
+		fgSizer4.SetFlexibleDirection( wx.BOTH )
+		fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+
+		self.m_buttonOK = wx.Button( lable.GetStaticBox(), wx.ID_OK, u"OK", wx.DefaultPosition, wx.DefaultSize, 0 )
+
+		self.m_buttonOK.SetDefault()
+		fgSizer4.Add( self.m_buttonOK, 0, wx.ALL, 5 )
+
+		self.m_buttonCancel = wx.Button( lable.GetStaticBox(), wx.ID_CANCEL, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer4.Add( self.m_buttonCancel, 0, wx.ALL, 5 )
+
+
+		lable.Add( fgSizer4, 1, wx.EXPAND, 5 )
+
+
+		self.SetSizer( lable )
+		self.Layout()
+		lable.Fit( self )
+
+		self.Centre( wx.BOTH )
+
+		# Connect Events
+		self.m_buttonOK.Bind( wx.EVT_BUTTON, self.OnOk )
+		self.m_buttonCancel.Bind( wx.EVT_BUTTON, self.OnCancel )
+
+	def __del__( self ):
+		pass
+
+
+	# Virtual event handlers, overide them in your derived class
+	def OnOk( self, event ):
+		event.Skip()
+
+	def OnCancel( self, event ):
+		event.Skip()
+
+
+
+
+
+def MessageBoxInput(s: str, title="", ignoredebugger=True) -> str:
+    with QueryDialog(None) as dlg:
+        dlg.Title=title
+        if dlg.ShowModal() != wx.ID_OK:
+            return ""
+        return dlg.m_textctl.Value
