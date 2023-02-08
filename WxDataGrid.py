@@ -713,10 +713,11 @@ class DataGrid():
 
 
     #--------------------------------------------------------
-    # Move a block of rows within the data source
-    # All row numbers are logical
-    # Oldrow is the 1st row of the block to be moved
-    # Newrow is the target position to which oldrow is moved
+    # Move a block of columns within the data source
+    # All column numbers are logical
+    # Oldcol is the 1st row of the block to be moved
+    # Numcols is the number of columns to be moved
+    # Newcol is the target position to which oldrow is moved
     def MoveCols(self, oldcol: int, numcols: int, newcol: int):        # DataGrid
         rows=self._datasource.Rows
 
@@ -729,18 +730,18 @@ class DataGrid():
             i1=list(range(0, dest))
             i2=list(range(dest, start))
             i3=list(range(start, end+1))
-            i4=list(range(end+1, len(rows)))
+            i4=list(range(end+1, self.NumCols))
             # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
         else:
             # Move Later
             i1=list(range(0, start))
             i2=list(range(start, end+1))
             i3=list(range(end+1, end+1+dest-start))
-            i4=list(range(end+1+dest-start, len(rows)))
+            i4=list(range(end+1+dest-start, self.NumCols))
             # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
 
         tpermuter: list[int]=i1+i3+i2+i4
-        permuter: list[int]=[-1]*len(tpermuter)     # This next bit of code inverts the permuter. (There ought to be a more elegant way to generate it!)
+        permuter: list[int]=[-1]*len(tpermuter)     # This next bit of code inverts tpermuter. (There ought to be a more elegant way to generate it!)
         for i, r in enumerate(tpermuter):
             permuter[r]=i
 
