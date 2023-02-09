@@ -1122,6 +1122,28 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
 
+    def DeleteColumn(self, icol: int) -> None:        # DataGrid
+        self._grid.SaveEditControlValue()
+
+        for row in self.Datasource.Rows:
+            if icol == 0:
+                row._cells=row._cells[1:]
+            elif icol == self.NumCols-1:
+                row._cells=row._cells[:-1]
+            else:
+                row._cells=row._cells[:icol]+row._cells[icol+1:]
+
+        # And now the column header
+        if icol == 0:
+            self.Datasource.ColDefs=self.Datasource.ColDefs[1:]
+        if icol == len(self.Datasource.ColDefs)-1:
+            self.Datasource.ColDefs=self.Datasource.ColDefs[:-1]
+        else:
+            self.Datasource.ColDefs=self.Datasource.ColDefs[:icol-1]+self.Datasource.ColDefs[icol:]
+
+        self.RefreshWxGridFromDatasource()
+
+
     def OnPopupInsertColLeft(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn-1)
