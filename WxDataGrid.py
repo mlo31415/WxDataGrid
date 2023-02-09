@@ -724,7 +724,7 @@ class DataGrid():
         dest=newcol
         start=oldcol
         end=oldcol+numcols-1
-        print(f"MoveCols: {start=}  {end=}  {numcols=}  {dest=}")
+        #print(f"MoveCols: {start=}  {end=}  {numcols=}  {dest=}")
         if newcol < oldcol:
             # Move earlier
             i1=list(range(0, dest))
