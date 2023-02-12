@@ -185,3 +185,13 @@ def MessageBoxInput(s: str, title="", ignoredebugger=True) -> str:
         if dlg.ShowModal() != wx.ID_OK:
             return ""
         return dlg.m_textctl.Value
+
+
+#------------------------------------------------------------------------
+# Add a character to a wxPython text box
+def AddChar(text: str, code) -> str:
+    if code == wx.WXK_BACK and len(text) > 0:
+        return text[:-1]
+    if code < 32 or code > 126:
+        return text
+    return text+chr(code)
