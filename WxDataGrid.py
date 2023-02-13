@@ -6,7 +6,7 @@ from abc import abstractmethod
 import wx
 import wx.grid
 
-from HelpersPackage import IsInt
+from HelpersPackage import IsInt, ListBlockMove
 from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 
@@ -316,9 +316,10 @@ class GridDataSource():
                 return temp.index(s.lower())
         return -1
 
-    # Insert a new column
-    # And index of -1 appends
-    def InsertColumnHeader(self, index: int, cdef: str | ColDefinition):     # GridDataSource() abstract class
+
+    # Insert a new column header.  NOTE: This does not insert the column in the data
+    # An index of -1 appends
+    def InsertColumnHeader(self, index: int, cdef: str|ColDefinition) -> None:  # GridDataSource() abstract class
         if type(cdef) is str:
             c=self._colDefs.index(cdef)
         c=ColDefinitionsList([cdef])
@@ -326,6 +327,34 @@ class GridDataSource():
             self._colDefs=self._colDefs[:index]+c+self._colDefs[index:]
         else:
             self._colDefs=self._colDefs+c
+
+
+    # Insert a new column including empty cells in the data.
+    # An index of -1 appends
+    def InsertColumn(self, index: int, cdef: str | ColDefinition) -> None:     # GridDataSource() abstract class
+        self.InsertColumnHeader(index, cdef)
+
+        if index == -1:
+            for row in self.Rows:
+                row.append("")
+            return
+
+        for row in self.Rows:
+            row=row[:index]+[""]+row[index+1:]
+
+
+    def DeleteColumn(self, index: int) -> None:     # GridDataSource() abstract class
+        self._colDefs=self._colDefs[:index]+self._colDefs[index+1:]
+        for row in self.Rows:
+            row.Cells=row.Cells[:index]+row.Cells[index+1:]
+
+
+    def MoveColumns(self, index: int, num: int, targetIndex: int) -> None:
+        assert targetIndex < self.NumCols and targetIndex >= 0
+
+        self._colDefs=ListBlockMove(self._colDefs, index, num, targetIndex)
+        for row in self.Rows:
+            row.Cells=ListBlockMove(row.Cells, index, num, targetIndex)
 
 
     # Take a box of row/col indexes such as used in a selection: (top, left, bottom, right)
