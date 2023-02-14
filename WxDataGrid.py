@@ -349,10 +349,11 @@ class GridDataSource():
             row.Cells=row.Cells[:index]+row.Cells[index+1:]
 
 
-    def MoveColumns(self, index: int, num: int, targetIndex: int) -> None:
+    def MoveColumns(self, index: int, num: int, targetIndex: int) -> None:    # GridDataSource() abstract class
         assert targetIndex < self.NumCols and targetIndex >= 0
 
-        self._colDefs=ListBlockMove(self._colDefs, index, num, targetIndex)
+        self._colDefs.List=ListBlockMove(self._colDefs.List, index, num, targetIndex)
+        self._allowCellEdits=ListBlockMove(self._allowCellEdits, index, num, targetIndex)
         for row in self.Rows:
             row.Cells=ListBlockMove(row.Cells, index, num, targetIndex)
 
@@ -748,56 +749,10 @@ class DataGrid():
     # Numcols is the number of columns to be moved
     # Newcol is the target position to which oldrow is moved
     def MoveCols(self, oldcol: int, numcols: int, newcol: int):        # DataGrid
-        rows=self._datasource.Rows
-
-        dest=newcol
-        start=oldcol
-        end=oldcol+numcols-1
-        #print(f"MoveCols: {start=}  {end=}  {numcols=}  {dest=}")
-        if newcol < oldcol:
-            # Move earlier
-            i1=list(range(0, dest))
-            i2=list(range(dest, start))
-            i3=list(range(start, end+1))
-            i4=list(range(end+1, self.NumCols))
-            # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
-        else:
-            # Move Later
-            i1=list(range(0, start))
-            i2=list(range(start, end+1))
-            i3=list(range(end+1, end+1+dest-start))
-            i4=list(range(end+1+dest-start, self.NumCols))
-            # print(f"{i1=}  {i2=}  {i3=}  {i4=}")
-
-        tpermuter: list[int]=i1+i3+i2+i4
-        permuter: list[int]=[-1]*len(tpermuter)     # This next bit of code inverts tpermuter. (There ought to be a more elegant way to generate it!)
-        for i, r in enumerate(tpermuter):
-            permuter[r]=i
-
-        for row in rows:
-            temp=[-1]*self.NumCols
-            for i in range(self.NumCols):
-                temp[i]=row[i]
-            for i in range(self.NumCols):
-                row[permuter[i]]=temp[i]
-        # Log("permuter: "+str(permuter))
-        # Log("tpermuter: "+str(tpermuter))
-        # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
-
-        # Move the column labels
-        temp: list=[None]*self.NumCols
-        for i in range(self.NumCols):
-            temp[i]=self.Datasource.ColDefs[i]
-        for i in range(self.NumCols):
-            self.Datasource.ColDefs[permuter[i]]=temp[i]
-
-        # Now use the permuter to update the row numbers of the cells which are allowed to be edited
-        for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
-            try:
-                self._datasource.AllowCellEdits[i]=(permuter[row], col)
-            except:
-                pass
-        # Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
+        self.Datasource.ColDefs.List=ListBlockMove(self.Datasource.ColDefs.List, oldcol, numcols, newcol)
+        self._grid.AllowCellEdits=ListBlockMove(self.Datasource.AllowCellEdits, oldcol, numcols, newcol)
+        for row in self._datasource.Rows:
+            row.Cells=ListBlockMove(row.Cells, oldcol, numcols, newcol)
 
 
     # ------------------
@@ -1031,16 +986,16 @@ class DataGrid():
         elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
             #print("**move left")
             left, right=self.ExtendColSelection()
-            if right != -1:   # There must be a selection
-                if left > 0: # Can move left only if the first col selected is not col 0
+            if right != -1 and left > 0:   # There must be a selection and it must have at least one col open to the left
+                if right < self.Datasource.NumCols:  # Entire block must be within defined cells
                     self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
                     self.SelectCols(left-1, right-1)
                     self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1:   # There must be a selection
-                if top > 0:  # Can move up only if the first row selected is not row 0
+            if top != -1 and top > 0:   # There must be a selection and it must have at least one row open to the top
+                if bottom < self.Datasource.NumRows:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
                     self.RefreshWxGridFromDatasource()
@@ -1048,16 +1003,15 @@ class DataGrid():
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
             left, right=self.ExtendColSelection()
-            if right != -1:   # There must be a selection
-                if right < self._grid.NumberCols-1:    # Can move further right only if the rightmost col is not selected
-                    self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
-                    self.SelectCols(left+1, right+1)
-                    self.RefreshWxGridFromDatasource()
+            if right != -1 and right < self.Datasource.NumCols-1:   # There must be a selection and at least one available col to the right
+                self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
+                self.SelectCols(left+1, right+1)
+                self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1:   # There must be a selection
-                if bottom < self._grid.NumberRows-1:      # Can move further down only if the bottom row is not selected
+            if top != -1 and bottom < self.Datasource.NumRows-1:   # There must be a selection and at least one row available beloe the selection's bottom
+                if bottom < self.NumRows-1:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
                     self.SelectRows(top+1, bottom+1)
                     self.RefreshWxGridFromDatasource()
