@@ -340,7 +340,7 @@ class GridDataSource():
             return
 
         for row in self.Rows:
-            row=row[:index]+[""]+row[index+1:]
+            row.Cells=row.Cells[:index]+[""]+row.Cells[index+1:]
 
 
     def DeleteColumn(self, index: int) -> None:     # GridDataSource() abstract class
