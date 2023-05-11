@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 from dataclasses import dataclass
 from abc import abstractmethod
 
@@ -391,6 +391,7 @@ class DataGrid():
         self.cntlDown: bool=False         # There's no cntl-key currently down
         self.clickedColumn: Optional[int]=None
         self.clickedRow: Optional[int]=None
+        self._ColorCellByValue: Optional[Callable[[int, int], None]]=None
 
 
     # --------------------------------------------------------
@@ -609,6 +610,12 @@ class DataGrid():
                 # self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.SetUnderlined(False)
                 self._grid.SetCellFont(irow, icol, font)
+
+        # Finally, if an override was specified, give it a call
+        if callable(self._ColorCellByValue):
+            self._ColorCellByValue(icol, irow)
+
+
 
     # --------------------------------------------------------
     def ColorCellsByValue(self):        # DataGrid
