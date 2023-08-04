@@ -179,7 +179,7 @@ class Selection():
             print(f"{label}: selected cell({cell.x}, {cell.y})")
 
 
-# An abstract class defining a row  of the GridDataSource
+# An abstract class defining a cols  of the GridDataSource
 class GridDataRowClass:
 
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
@@ -358,7 +358,7 @@ class GridDataSource():
             row.Cells=ListBlockMove(row.Cells, index, num, targetIndex)
 
 
-    # Take a box of row/col indexes such as used in a selection: (top, left, bottom, right)
+    # Take a box of cols/col indexes such as used in a selection: (top, left, bottom, right)
     # and limit it to the rows and columns actually currently defined
     def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:     # GridDataSource() abstract class
         top, left, bottom, right=box
@@ -460,7 +460,7 @@ class DataGrid():
         self.Datasource.InsertEmptyRows(irow, nrows)    # Insert the requisite number of rows at irow
 
         # Now update the editable status of non-editable columns
-        # All row numbers >= irow are incremented by nrows
+        # All cols numbers >= irow are incremented by nrows
         for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
             if row >= irow:
                 self.Datasource.AllowCellEdits[i]=(row+nrows, col)
@@ -475,14 +475,14 @@ class DataGrid():
         numrows=min(numrows, self.Datasource.NumRows-irow)  # If the request goes beyond the end of the data, ignore the extras
         del self.Datasource.Rows[irow:irow+numrows]
 
-        # We also need to drop entries in AllowCellEdits which refer to this row and adjust the indexes of ones referring to all later rows
+        # We also need to drop entries in AllowCellEdits which refer to this cols and adjust the indexes of ones referring to all later rows
         for index, (i, j) in enumerate(self.Datasource.AllowCellEdits):
             if i >= irow:
                 if i < irow+numrows:
                     # Mark it for deletion
                     self.Datasource.AllowCellEdits[index]=(-1, -1)  # We tag them rather than deleting them so we don't mess up the enumerate loop
                 else:
-                    # Update it to the new row indexing scheme
+                    # Update it to the new cols indexing scheme
                     self.Datasource.AllowCellEdits[index]=(i-numrows, j)
         self.Datasource.AllowCellEdits=[x for x in self.Datasource.AllowCellEdits if x[0] != -1]  # Get rid of the tagged entries
 
@@ -549,13 +549,13 @@ class DataGrid():
                 self.SetCellBackgroundColor(irow, icol, Color.LightGray)
             return
 
-        # We're now in a row that includes data
+        # We're now in a cols that includes data
         # First turn off any special formatting
         self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
         self.SetCellBackgroundColor(irow, icol, Color.White)
         self._grid.SetCellTextColour(irow, icol, Color.Black)
 
-        # If the row is a text row and if there's a special text color
+        # If the cols is a text cols and if there's a special text color
         # The special text color can be a color, which we then use to color the text or
         # It can be anything else, in which case we BOLD the text.
         if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow and self._datasource.SpecialTextColor is not None:
@@ -565,7 +565,7 @@ class DataGrid():
                 else:
                     self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Bold())
 
-        # If the row is a link row give it the look of a link
+        # If the cols is a link cols give it the look of a link
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
             # Locate the "Display Name" column
             if not "Display Name" in self.Datasource.ColHeaders:
@@ -643,8 +643,32 @@ class DataGrid():
         return None
 
     # ------------------
-    def RefreshWxGridFromDatasource(self, IgnoreCurrentGrid=False):        # DataGrid
+    def RefreshWxGridFromDatasource(self, RetainSelection=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
         selection=Selection(self._grid)
+
+        # When both StartRow and EndRow != -1, we want only a portion of the grid to be redisplayed.
+        # We are saying:
+        #   (1) that only the StartRow to EndRow rows may have changed and
+        #   (2) That the number of rows is unchanged
+        #   (3) We do not need to change ths state of scrolling
+        #   (4) We do not need to change the column headers or the column widths
+        # This will most typically be used for moving a small block of rows up or down one row
+        if StartRow != -1 and EndRow != -1 and StartRow <= EndRow and StartCol == -1 and EndCol == -1:
+            # Reload the cells
+            for irow in range(StartRow, EndRow+1):
+                self.ReloadRow(irow)
+            self.ColorCellsByValue()
+            return
+
+        # Likewise for columns
+        if StartCol != -1 and EndCol != -1 and StartCol <= EndCol and StartRow == -1 and EndRow == -1:
+            # Reload the cells
+            for irow in range(self.Datasource.NumRows):
+                for icol in range(StartCol, EndCol+1):
+                    self.ReloadCell(irow, icol)
+            self.ColorCellsByValue()
+            self.SetColHeaders(self._datasource.ColDefs)
+            return
 
         # Record the visible lines so we can make them visible again later
         visibleRows=[]
@@ -664,33 +688,13 @@ class DataGrid():
 
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
-            if self._datasource.Rows[irow].IsTextRow:
-                self._grid.SetCellSize(irow, 0, 1, self.NumCols)   # Make text rows all one cell
-
-            elif self._datasource.Rows[irow].IsLinkRow:    # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
-                # Locate the "Display Name" column
-                if not "Display Name" in self._datasource.ColHeaders:
-                    assert False  # This should never happen
-                colnum=self._datasource.ColHeaders.index("Display Name")
-                self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
-                self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
-
-            else:
-                self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
-
-            for icol in range(len(self._datasource.ColDefs)):
-                val=self._datasource[irow][icol]
-                if val is None:
-                    val=""
-                else:
-                    val=str(val)
-                self._grid.SetCellValue(irow, icol, val)
+            self.ReloadRow(irow)
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
         #self._grid.AutoSize()
 
-        if not IgnoreCurrentGrid:
+        if RetainSelection:
             selection.Restore(self._grid)
             # Make the lines which were visible before we messed with things visible again
             if visibleRows:
@@ -698,10 +702,62 @@ class DataGrid():
                 self._grid.MakeCellVisible(max(visibleRows), 0)
 
 
+    #--------------------------------------------------
+    # Reload a specific row
+    def ReloadRow(self, irow):
+        if self._datasource.Rows[irow].IsTextRow:
+            self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
+
+        elif self._datasource.Rows[irow].IsLinkRow:  # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
+            # Locate the "Display Name" column
+            if not "Display Name" in self._datasource.ColHeaders:
+                assert False  # This should never happen
+            colnum=self._datasource.ColHeaders.index("Display Name")
+            self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
+            self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
+
+        else:
+            self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
+        for icol in range(len(self._datasource.ColDefs)):
+            val=self._datasource[irow][icol]
+            if val is None:
+                val=""
+            else:
+                val=str(val)
+            self._grid.SetCellValue(irow, icol, val)
+
+
+    #--------------------------------------------------
+    # Reload a specific cell
+    def ReloadCell(self, irow, icol):
+
+        # # In some cases ands entire row must be reset
+        # if self._datasource.Rows[irow].IsTextRow and icol == 0:
+        #     self._grid.SetCellSize(irow, icol, 1, self.NumCols)  # Make text rows all one cell
+        #
+        # elif self._datasource.Rows[irow].IsLinkRow:  # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
+        #     # Locate the "Display Name" column
+        #     if not "Display Name" in self._datasource.ColHeaders:
+        #         assert False  # This should never happen
+        #     colnum=self._datasource.ColHeaders.index("Display Name")
+        #     self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
+        #     self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
+        #
+        # else:
+        #     self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
+
+        val=self._datasource[irow][icol]
+        if val is None:
+            val=""
+        else:
+            val=str(val)
+        self._grid.SetCellValue(irow, icol, val)
+
+
     #--------------------------------------------------------
     # Move a block of rows within the data source
-    # All row numbers are logical
-    # Oldrow is the 1st row of the block to be moved
+    # All cols numbers are logical
+    # Oldrow is the 1st cols of the block to be moved
     # Newrow is the target position to which oldrow is moved
     def MoveRows(self, oldrow: int, numrows: int, newrow: int):        # DataGrid
         rows=self._datasource.Rows
@@ -740,7 +796,7 @@ class DataGrid():
 
         # Log("\npermuter: "+str(permuter))
         # Log("old editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
-        # Now use the permuter to update the row numbers of the cells which are allowed to be edited
+        # Now use the permuter to update the cols numbers of the cells which are allowed to be edited
         for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
             try:
                 self._datasource.AllowCellEdits[i]=(permuter[row], col)
@@ -752,7 +808,7 @@ class DataGrid():
     #--------------------------------------------------------
     # Move a block of columns within the data source
     # All column numbers are logical
-    # Oldcol is the 1st row of the block to be moved
+    # Oldcol is the 1st cols of the block to be moved
     # Numcols is the number of columns to be moved
     # Newcol is the target position to which oldrow is moved
     def MoveCols(self, oldcol: int, numcols: int, newcol: int):        # DataGrid
@@ -787,14 +843,14 @@ class DataGrid():
         num=pasteBottom-len(self._datasource.Rows)+1
         if num > 0:
             self.Datasource.InsertEmptyRows(self.Datasource.NumRows, num)
-        # Refresh the datagrid from the Datasource to make it also bigger
-        self.RefreshWxGridFromDatasource()
+        # # Refresh the datagrid from the Datasource to make it also bigger
+        # self.RefreshWxGridFromDatasource(StartRow=pasteTop, EndRow=pasteBottom, StartCol=pasteLeft, EndCol=pasteRight)
 
         # Copy the cells from the clipboard to the grid in lstData.
         for i, row in enumerate(self.clipboard, start=pasteTop):
             for j, cellval in enumerate(row, start=pasteLeft):
                 self._datasource[i][j]=cellval
-        self.RefreshWxGridFromDatasource()
+        self.RefreshWxGridFromDatasource(StartRow=pasteTop, EndRow=pasteBottom, StartCol=pasteLeft, EndCol=pasteRight)
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
@@ -826,14 +882,14 @@ class DataGrid():
         row=event.GetRow()
         col=event.GetCol()
 
-        # If we're entering data in a new row or a new column, append the necessary number of new rows and/or columns to the data source
+        # If we're entering data in a new cols or a new column, append the necessary number of new rows and/or columns to the data source
         self.ExpandDataSourceToInclude(row, col)
 
         newVal=self._grid.GetCellValue(row, col)
         self._datasource[row][col]=newVal
-        #Log("set datasource("+str(row)+", "+str(col)+")="+newVal)
+        #Log("set datasource("+str(cols)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
-        self.RefreshWxGridFromDatasource()
+        self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row)
         self.AutoSizeColumns()
 
     # ------------------
@@ -889,7 +945,7 @@ class DataGrid():
 
 
     #------------------
-    # This records the column and row and disables all the popup menu items
+    # This records the column and cols and disables all the popup menu items
     # Then it enables copy and paste if appropriate.
     # Further handling is the responsibility of the application which called it
     def OnGridCellRightClick(self, event, m_GridPopup):        # DataGrid
@@ -985,9 +1041,8 @@ class DataGrid():
 
         elif event.KeyCode == 308:                  # cntl key alone
             self.cntlDown=True
-            print("cntlDown=True")
 
-        elif event.KeyCode == 68:                   # Kludge to be able to force a refresh (press "d")
+        elif event.KeyCode == wx.WXK_F5:                   # Kludge to be able to force a refresh (press "d")
             self.RefreshWxGridFromDatasource()
 
         elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
@@ -997,15 +1052,15 @@ class DataGrid():
                 if right < self.Datasource.NumCols:  # Entire block must be within defined cells
                     self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
                     self.SelectCols(left-1, right-1)
-                    self.RefreshWxGridFromDatasource()
+                    self.RefreshWxGridFromDatasource(StartCol=left-1, EndCol=right)
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1 and top > 0:   # There must be a selection and it must have at least one row open to the top
+            if top != -1 and top > 0:   # There must be a selection and it must have at least one cols open to the top
                 if bottom < self.Datasource.NumRows:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
-                    self.RefreshWxGridFromDatasource()
+                    self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom)
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
@@ -1013,15 +1068,15 @@ class DataGrid():
             if right != -1 and right < self.Datasource.NumCols-1:   # There must be a selection and at least one available col to the right
                 self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
                 self.SelectCols(left+1, right+1)
-                self.RefreshWxGridFromDatasource()
+                self.RefreshWxGridFromDatasource(StartCol=left, EndCol=right+1)
 
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1 and bottom < self.Datasource.NumRows-1:   # There must be a selection and at least one row available beloe the selection's bottom
+            if top != -1 and bottom < self.Datasource.NumRows-1:   # There must be a selection and at least one cols available beloe the selection's bottom
                 if bottom < self.NumRows-1:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
                     self.SelectRows(top+1, bottom+1)
-                    self.RefreshWxGridFromDatasource()
+                    self.RefreshWxGridFromDatasource(StartRow=top, EndRow=bottom+1)
 
         else:
             event.Skip()
@@ -1030,7 +1085,6 @@ class DataGrid():
     def OnKeyUp(self, event):        # DataGrid
         if event.KeyCode == 308:                    # cntl
             self.cntlDown=False
-            print("cntlDown=False")
 
 
     #------------------
@@ -1040,7 +1094,7 @@ class DataGrid():
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
         self.CopyCells(top, left, bottom, right)
-        self.RefreshWxGridFromDatasource()
+        # self.RefreshWxGridFromDatasource()
 
 
     #------------------
@@ -1049,7 +1103,6 @@ class DataGrid():
         self._grid.SaveEditControlValue()
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
-        self.RefreshWxGridFromDatasource()
 
 
     def OnPopupEraseSelection(self, event):        # DataGrid
@@ -1058,7 +1111,7 @@ class DataGrid():
         for irow in range(top, bottom+1):
             for icol in range (left, right+1):
                 self.Datasource[irow][icol]=""
-        self.RefreshWxGridFromDatasource()
+        self.RefreshWxGridFromDatasource(StartRow=top, EndRow=bottom+1, StartCol=left, EndCol=right+1)
 
 
     # Delete the selected columns
@@ -1137,6 +1190,7 @@ class DataGrid():
     def OnPopupInsertColLeft(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn-1)
+
 
     def OnPopupInsertColRight(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
