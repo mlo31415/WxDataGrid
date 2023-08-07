@@ -1,9 +1,9 @@
-from typing import Union, Tuple, Optional, List
+from typing import Optional
 import time
 import wx
 from wx import _core
 
-from Log import Log, LogClose
+from Log import Log
 
 
 # This is used:
@@ -128,10 +128,10 @@ class QueryDialog ( wx.Dialog ):
 
 		lable = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
 
-		self.label = wx.StaticText( lable.GetStaticBox(), wx.ID_ANY, u"Enter the new column's name", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.label.Wrap( -1 )
+		self.wxLable = wx.StaticText( lable.GetStaticBox(), wx.ID_ANY, u"Enter the new column's name", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.wxLable.Wrap( -1 )
 
-		lable.Add( self.label, 0, wx.ALL, 5 )
+		lable.Add( self.wxLable, 0, wx.ALL, 5 )
 
 		self.m_textctl = wx.TextCtrl( lable.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_textctl.SetMinSize( wx.Size( 200,-1 ) )
@@ -167,24 +167,28 @@ class QueryDialog ( wx.Dialog ):
 	def __del__( self ):
 		pass
 
-
 	# Virtual event handlers, overide them in your derived class
 	def OnOk( self, event ):
-		event.Skip()
+		self.EndModal(wx.ID_OK)
 
 	def OnCancel( self, event ):
-		event.Skip()
+		self.EndModal(wx.ID_CANCEL)
 
 
 
+def MessageBoxInput(s: str="", title="", initialValue: str="", ignoredebugger=True) -> str:
+    dlg=QueryDialog(None)
+    dlg.Title=title
+    dlg.wxLable.LabelText=s
 
-
-def MessageBoxInput(s: str, title="", ignoredebugger=True) -> str:
-    with QueryDialog(None) as dlg:
-        dlg.Title=title
-        if dlg.ShowModal() != wx.ID_OK:
-            return ""
-        return dlg.m_textctl.Value
+    dlg.m_textctl.Value=initialValue
+    ret=""
+    try:
+        if dlg.ShowModal() == wx.ID_OK:
+            ret=dlg.m_textctl.Value
+    finally:
+        dlg.Destroy()
+    return ret
 
 
 #------------------------------------------------------------------------
