@@ -718,6 +718,7 @@ class DataGrid():
 
         else:
             self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
+
         for icol in range(len(self._datasource.ColDefs)):
             val=self._datasource[irow][icol]
             if val is None:
@@ -1199,3 +1200,7 @@ class DataGrid():
     # ------------------
     def HideRowLabels(self) -> None:        # DataGrid
         self._grid.HideRowLabels()
+
+    # ------------------
+    def HideColLabels(self) -> None:  # DataGrid
+        self._grid.HideColLabels()
