@@ -15,7 +15,7 @@ from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 class ColDefinition:
     Name: str=""
     Width: int=100
-    Type: str=""
+    Type: str=""        # Empty is string, others are  "int", "date range",  "date", and "required str"
     IsEditable: str="yes"
     preferred: str=""
 
