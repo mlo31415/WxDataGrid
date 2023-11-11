@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Union, Optional, Callable
 from dataclasses import dataclass
 from abc import abstractmethod
+from enum import Enum
 
 import wx
 import wx.grid
@@ -10,13 +11,19 @@ from HelpersPackage import IsInt, ListBlockMove
 from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 
+
+class IsEditable(Enum):
+    Yes=1
+    No=2
+    Maybe=3
+
 #================================================================
 @dataclass
 class ColDefinition:
     Name: str=""
     Width: int=100
     Type: str=""        # Empty is string, others are  "int", "date range",  "date", and "required str"
-    IsEditable: str="yes"
+    IsEditable: IsEditable=IsEditable.Yes
     preferred: str=""
 
     @property
@@ -27,6 +34,7 @@ class ColDefinition:
 
     def Signature(self) -> int:     # ColDefinition
         return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self.preferred)
+
 
 
 
@@ -112,8 +120,14 @@ class ColDefinitionsList:
     def __len__(self) -> int:       # ColDefinitionsList
         return len(self.List)
 
-    def append(self, val: ColDefinition):       # ColDefinitionsList
-        self.List.append(val)
+    def append(self, val: ColDefinition | ColDefinitionsList):       # ColDefinitionsList
+        if type(val) is ColDefinition:
+            self.List.append(val)
+        elif type(val) is ColDefinitionsList:
+            self.List.extend(val.List)
+        else:
+            assert False
+
 
     def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       # ColDefinitionsList
         return ColDefinitionsList(self.List+val.List)
@@ -145,7 +159,7 @@ class Color:
 
 
 # A class to store and restore a selection
-class Selection():
+class Selection:
     def __init__(self, grid: wx.grid.Grid):
         self.selectedBlocks=grid.GetSelectedBlocks()
         self.selectedCols=grid.GetSelectedCols()
@@ -229,7 +243,7 @@ class GridDataSource():
 
     def __init__(self):     # GridDataSource() abstract class
         self._colDefs: ColDefinitionsList=ColDefinitionsList([])
-        self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding a "maybe" for the col
+        self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding an IsEditable.Maybe for the col
         self._gridDataRowClass: GridDataRowClass=None
         # self.Rows must be supplied by the derived class
 
@@ -282,14 +296,15 @@ class GridDataSource():
     def Rows(self, rows: list[GridDataRowClass]) -> None:     # GridDataSource() abstract class
         pass
 
-    def AppendEmptyRows(self, num: int = 1):     # GridDataSource() abstract class
+    def AppendEmptyRows(self, num: int = 1) -> []:     # GridDataSource() abstract class
         self.InsertEmptyRows(self.NumRows, num)
+        return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
 
     def IsEmptyRow(self, i: int) -> bool:     # GridDataSource() abstract class
         return self.Rows[i].IsEmptyRow()
 
     @abstractmethod
-    def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
+    def  InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
 
     @property
@@ -320,8 +335,6 @@ class GridDataSource():
     # Insert a new column header.  NOTE: This does not insert the column in the data
     # An index of -1 appends
     def InsertColumnHeader(self, index: int, cdef: str|ColDefinition) -> None:  # GridDataSource() abstract class
-        if type(cdef) is str:
-            c=self._colDefs.index(cdef)
         c=ColDefinitionsList([cdef])
         if index >= 0:
             self._colDefs=self._colDefs[:index]+c+self._colDefs[index:]
@@ -405,7 +418,7 @@ class DataGrid():
         for irow, row in enumerate(self._datasource.Rows):
             if row.IsTextRow or row.IsLinkRow:
                 for icol, ch in enumerate(self._datasource.ColDefs):
-                    if ch.IsEditable == "maybe":
+                    if ch.IsEditable == IsEditable.Maybe:
                         self.AllowCellEdit(irow, icol)
 
 
@@ -545,7 +558,7 @@ class DataGrid():
             # Row overflow is permitted and extra rows (rows in the grid, but not in the datasource) are colored generically
             self._grid.SetCellSize(irow, icol, 1, 1)  # Eliminate any spans
             self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
-            if self._datasource.ColDefs[icol].IsEditable == "no" or self._datasource.ColDefs[icol].IsEditable == "maybe":
+            if self._datasource.ColDefs[icol].IsEditable == IsEditable.No or self._datasource.ColDefs[icol].IsEditable == IsEditable.Maybe:
                 self.SetCellBackgroundColor(irow, icol, Color.LightGray)
             return
 
@@ -575,9 +588,9 @@ class DataGrid():
                 self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
 
         # If the column is not editable, color it light gray regardless of its value
-        elif self._datasource.ColDefs[icol].IsEditable == "no":
+        elif self._datasource.ColDefs[icol].IsEditable == IsEditable.No:
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
-        elif self._datasource.ColDefs[icol].IsEditable == "maybe" and (irow, icol) not in self._datasource.AllowCellEdits:
+        elif self._datasource.ColDefs[icol].IsEditable == IsEditable.Maybe and (irow, icol) not in self._datasource.AllowCellEdits:
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
 
         else:
@@ -897,10 +910,10 @@ class DataGrid():
     def OnGridEditorShown(self, event):        # DataGrid
         irow=event.GetRow()
         icol=event.GetCol()
-        if self.Datasource.ColDefs[icol].IsEditable == "no":
+        if self.Datasource.ColDefs[icol].IsEditable == IsEditable.No:
             event.Veto()
             return
-        if self.Datasource.ColDefs[icol].IsEditable == "maybe":
+        if self.Datasource.ColDefs[icol].IsEditable == IsEditable.Maybe:
             if (irow, icol) not in self.Datasource.AllowCellEdits:
                 event.Veto()
 
