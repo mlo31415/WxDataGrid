@@ -73,7 +73,7 @@ class ProgressMessage(object):
             self._parent.Raise()
 
 class ProgressMsg(object):
-    def __init__(self, parent: Optional[wx.TopLevelWindow], message: str, delay: float= 0.5) -> None:
+    def __init__(self, parent: wx.TopLevelWindow | None, message: str, delay: float= 0.5) -> None:
         self.pm=ProgressMessage(parent)
         self._parent=parent
         self.message=message
