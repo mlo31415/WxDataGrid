@@ -81,6 +81,10 @@ class ProgressMsg(object):
 
     def __enter__(self):
         self.pm.Show(self.message, delay=self.delay)
+        # If a parent has been defined, move the progress message to the parent's position
+        # This is handy when there's multiple monitors
+        if self._parent is not None:
+            self.pm._progressMessageDlg.SetPosition(self._parent.GetPosition())
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.pm.Close()
