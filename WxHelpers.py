@@ -195,10 +195,38 @@ def MessageBoxInput(s: str="", title="", initialValue: str="", ignoredebugger=Tr
 
 
 #------------------------------------------------------------------------
-# Add a character to a wxPython text box
+# Add a character to the end of a wxPython text box
 def AddChar(text: str, code) -> str:
     if code == wx.WXK_BACK and len(text) > 0:
         return text[:-1]
     if code < 32 or code > 126:
         return text
     return text+chr(code)
+
+
+#------------------------------------------------------------------------
+# Process a new character entered into a wxPython text box
+def ProcessChar(text: str, code: int, cursorloc: int) -> (str, int):
+    match code:
+        case wx.WXK_BACK:
+            if cursorloc > 0:
+                text=text[:cursorloc-1]+text[cursorloc:]
+                cursorloc=cursorloc-1
+        case wx.WXK_DELETE:
+            if cursorloc < len(text):
+                text=text[:cursorloc]+text[cursorloc+1:]
+        case wx.WXK_LEFT:
+            if cursorloc > 0:
+                cursorloc=cursorloc-1
+        case wx.WXK_RIGHT:
+            if cursorloc < len(text):
+                cursorloc+=1
+        case wx.WXK_END:
+            cursorloc=len(text)
+        case wx.WXK_HOME:
+            cursorloc=0
+        case x if x >= 32 and x <= 126:
+            text=text[:cursorloc]+chr(code)+text[cursorloc:]
+            cursorloc+=1
+
+    return text, cursorloc
