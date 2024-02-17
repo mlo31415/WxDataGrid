@@ -884,11 +884,6 @@ class DataGrid():
                 for j in range(self._datasource.NumRows):
                     self._datasource.Rows[j].append("") # Note that append is implemented only when columns can be added
 
-    #------------------------------------
-    # In many even handlers we need to save the click location
-    def SaveClickLocation(self, event):        # DataGrid
-        self.clickedColumn=event.GetCol()
-        self.clickedRow=event.GetRow()
 
     #------------------
     def OnGridCellChanged(self, event):        # DataGrid
@@ -919,7 +914,7 @@ class DataGrid():
 
     # ------------------
     def OnGridLabelLeftClick(self, event):        # DataGrid
-        self.SaveClickLocation(event)
+        self.SaveLeftClickLocation(event)
 
         if self.clickedColumn >= 0:
             self._grid.ClearSelection()
@@ -931,7 +926,7 @@ class DataGrid():
 
 
     def DefaultPopupEnabler(self, event, popup) -> None:        # DataGrid
-        self.SaveClickLocation(event)
+        self.SaveClickLocation(event, "right")
 
         # Set everything to disabled.
         for mi in popup.GetMenuItems():
@@ -954,7 +949,7 @@ class DataGrid():
     # ------------------
     def OnGridLabelRightClick(self, event, m_GridLabelPopup):        # DataGrid
         if m_GridLabelPopup is None:
-            event.skip()
+            event.Skip()
         self.DefaultPopupEnabler(event, m_GridLabelPopup)
 
 
@@ -963,13 +958,31 @@ class DataGrid():
     # Then it enables copy and paste if appropriate.
     # Further handling is the responsibility of the application which called it
     def OnGridCellRightClick(self, event, m_GridPopup):        # DataGrid
+        self.SaveClickLocation(event, "right")
         self.DefaultPopupEnabler(event, m_GridPopup)
+        event.Skip()
 
 
     #-------------------
     def OnGridCellDoubleClick(self, event):        # DataGrid
-        self.SaveClickLocation(event)
+        self.SaveClickLocation(event, "double")
+        event.Skip()
         #TODO: Is this all?
+
+
+    #-------------------
+    def OnGridCellLeftClick(self, event):        # DataGrid
+        self.SaveClickLocation(event, "left")
+        event.Skip()
+        #TODO: Is this all?
+
+
+    #------------------------------------
+    # In many even handlers we need to save the click location
+    def SaveClickLocation(self, event, clicktype: str=""):        # DataGrid
+        self.clickedColumn=event.GetCol()
+        self.clickedRow=event.GetRow()
+        self.clickType=clicktype
 
 
     #-------------------
