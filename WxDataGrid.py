@@ -960,21 +960,19 @@ class DataGrid():
     def OnGridCellRightClick(self, event, m_GridPopup):        # DataGrid
         self.SaveClickLocation(event, "right")
         self.DefaultPopupEnabler(event, m_GridPopup)
-        event.Skip()
+        event.Skip()    # Continue with default processing
 
 
     #-------------------
     def OnGridCellDoubleClick(self, event):        # DataGrid
         self.SaveClickLocation(event, "double")
-        event.Skip()
-        #TODO: Is this all?
+        event.Skip()    # Continue with default processing
 
 
     #-------------------
     def OnGridCellLeftClick(self, event):        # DataGrid
         self.SaveClickLocation(event, "left")
-        event.Skip()
-        #TODO: Is this all?
+        event.Skip()    # Continue with default processing
 
 
     #------------------------------------
