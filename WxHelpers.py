@@ -50,6 +50,9 @@ class ProgressMessage(object):
         if close:
             self.Close(delay)
 
+    def Destroy(self):
+        self.Close()
+
     def UpdateMessage(self, s: str):
         if ProgressMessage._progressMessageDlg is None:
             Log("ProgressMessage.UpdateMessage() called without an existing ProgressDialog")
