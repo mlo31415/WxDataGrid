@@ -914,7 +914,7 @@ class DataGrid():
 
     # ------------------
     def OnGridLabelLeftClick(self, event):        # DataGrid
-        self.SaveLeftClickLocation(event)
+        self.SaveClickLocation(event)
 
         if self.clickedColumn >= 0:
             self._grid.ClearSelection()
