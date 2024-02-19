@@ -13,8 +13,8 @@ from Log import Log
 #   It deals with dlg.destroy()
 
 class ModalDialogManager():
-    def __init__(self, classType: wx.Dialog, *args, **kargs):
-        self._class: wx.Dialog=classType
+    def __init__(self, classType: callable, *args, **kargs):
+        self._class: callable=classType
         self._args=args
         self._kargs=kargs
 
