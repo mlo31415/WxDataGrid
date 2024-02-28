@@ -404,6 +404,7 @@ class DataGrid():
         self.cntlDown: bool=False         # There's no cntl-key currently down
         self.clickedColumn: Optional[int]=None
         self.clickedRow: Optional[int]=None
+        self.clickType: Optional[str]=None
         self._ColorCellByValue: Optional[Callable[[int, int], None]]=None
 
 
