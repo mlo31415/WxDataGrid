@@ -12,10 +12,12 @@ from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 
 
+# Is this cell editable
 class IsEditable(Enum):
     Yes=1
     No=2
-    Maybe=3
+    Maybe=3     # Not editable by default, but can be made editable
+
 
 #================================================================
 @dataclass
@@ -409,12 +411,18 @@ class DataGrid():
 
 
     # --------------------------------------------------------
+    # Mark a cell as editable
     def AllowCellEdit(self, irow: int, icol: int) -> None:        # DataGrid
+        # Append this cell to the list of cells which are editable in spite of their default editability
         self._datasource.AllowCellEdits.append((irow, icol))
+        # If necessary, append some empty lines to make this row a real row,
         if irow >= self.NumRows:
             self._grid.AppendRows(irow-self.NumRows+1)
 
+
+    # --------------------------------------------------------
     # Make text lines to be merged and editable
+    # N.b., this may not actually be used anywhere and, hence, may not be tested
     def MakeTextLinesEditable(self) -> None:        # DataGrid
         for irow, row in enumerate(self._datasource.Rows):
             if row.IsTextRow or row.IsLinkRow:
@@ -902,6 +910,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row)
         self.AutoSizeColumns()
 
+
     # ------------------
     def OnGridEditorShown(self, event):        # DataGrid
         irow=event.GetRow()
@@ -912,6 +921,7 @@ class DataGrid():
         if self.Datasource.ColDefs[icol].IsEditable == IsEditable.Maybe:
             if (irow, icol) not in self.Datasource.AllowCellEdits:
                 event.Veto()
+
 
     # ------------------
     def OnGridLabelLeftClick(self, event):        # DataGrid
@@ -1003,6 +1013,7 @@ class DataGrid():
         return top, left, bottom, right
 
 
+    #------------------------------------
     def HasSelection(self) -> bool:        # DataGrid
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
             return True
@@ -1011,16 +1022,21 @@ class DataGrid():
         return False
 
 
+    #------------------------------------
     def SelectRows(self, top, bottom) -> None:        # DataGrid
         self._grid.SelectRow(top)
         for i in range(top+1, bottom+1):
             self._grid.SelectRow(i, addToSelected = True)
 
+
+    #------------------------------------
     def SelectCols(self, left, right) -> None:        # DataGrid
         self._grid.SelectCol(left)
         for i in range(left+1, right+1):
             self._grid.SelectCol(i, addToSelected = True)
 
+
+    #------------------------------------
     # Return a box which bounds all selections in the grid
     # Top, Left, Bottom, Right
     def SelectionBoundingBox(self) -> Optional[tuple[int, int, int, int]]:        # DataGrid
@@ -1039,6 +1055,8 @@ class DataGrid():
 
         return top, left, bottom, right
 
+
+    #------------------------------------
     # Take the existing selected cells and extend the selection to the full rows
     def ExtendRowSelection(self) -> tuple[int, int]:        # DataGrid
         if len(self._grid.SelectionBlockTopLeft) == 0:
@@ -1047,6 +1065,8 @@ class DataGrid():
         self.SelectRows(top, bottom)
         return top, bottom
 
+
+    #------------------------------------
     # Take the existing selected cells and extend the selection to the full columns
     def ExtendColSelection(self) -> tuple[int, int]:        # DataGrid
         if len(self._grid.SelectionBlockTopLeft) == 0:
@@ -1131,6 +1151,7 @@ class DataGrid():
         self.PasteCells(top, left)
 
 
+    #------------------------------------
     def OnPopupEraseSelection(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         top, left, bottom, right=self.Datasource.LimitBoxToActuals(self.LocateSelection())
@@ -1140,6 +1161,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource(StartRow=top, EndRow=bottom+1, StartCol=left, EndCol=right+1)
 
 
+    #------------------------------------
     # Delete the selected columns
     def DeleteSelectedColumns(self):        # DataGrid
         self._grid.SaveEditControlValue()
@@ -1157,6 +1179,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
 
+    #------------------------------------
     def DeleteSelectedRows(self):        # DataGrid
         self._grid.SaveEditControlValue()
         top, _, bottom, _=self.SelectionBoundingBox()
@@ -1168,6 +1191,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
 
+    #------------------------------------
     def OnPopupRenameCol(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         v=MessageBoxInput("Enter the new column name", title="Renaming column", ignoredebugger=True)
@@ -1177,6 +1201,7 @@ class DataGrid():
             self.RefreshWxGridFromDatasource()
 
 
+    #------------------------------------
     def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:        # DataGrid
         self._grid.SaveEditControlValue()
         if name == "":
@@ -1191,6 +1216,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
 
+    #------------------------------------
     def DeleteColumn(self, icol: int) -> None:        # DataGrid
         self._grid.SaveEditControlValue()
 
@@ -1213,18 +1239,22 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
 
+    #------------------------------------
     def OnPopupInsertColLeft(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn-1)
 
 
+    #------------------------------------
     def OnPopupInsertColRight(self, event):        # DataGrid
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn)
 
+
     # ------------------
     def HideRowLabels(self) -> None:        # DataGrid
         self._grid.HideRowLabels()
+
 
     # ------------------
     def HideColLabels(self) -> None:  # DataGrid
