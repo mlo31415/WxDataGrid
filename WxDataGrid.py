@@ -571,13 +571,13 @@ class DataGrid():
                 self.SetCellBackgroundColor(irow, icol, Color.LightGray)
             return
 
-        # We're now in a cols that includes data
+        # We're now in a col that includes data
         # First turn off any special formatting
         self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).GetBaseFont())
         self.SetCellBackgroundColor(irow, icol, Color.White)
         self._grid.SetCellTextColour(irow, icol, Color.Black)
 
-        # If the cols is a text cols and if there's a special text color
+        # If the col is a text col and if there's a special text color
         # The special text color can be a color, which we then use to color the text or
         # It can be anything else, in which case we BOLD the text.
         if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow and self._datasource.SpecialTextColor is not None:
@@ -587,7 +587,7 @@ class DataGrid():
                 else:
                     self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Bold())
 
-        # If the cols is a link cols give it the look of a link
+        # If the col is a link col give it the look of a link
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
             # Locate the "Display Name" column
             if not "Display Name" in self.Datasource.ColHeaders:
@@ -595,10 +595,12 @@ class DataGrid():
             colnum=self.Datasource.ColHeaders.index("Display Name")
             if icol < colnum:
                 self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
+            # Is there a "Display Name" column?
 
         # If the column is not editable, color it light gray regardless of its value
         elif self._datasource.ColDefs[icol].IsEditable == IsEditable.No:
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
+
         elif self._datasource.ColDefs[icol].IsEditable == IsEditable.Maybe and (irow, icol) not in self._datasource.AllowCellEdits:
             self.SetCellBackgroundColor(irow, icol, Color.LightGray)
 
@@ -738,6 +740,7 @@ class DataGrid():
             self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
             self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
 
+            # Is there a "Display Name" column?
         else:
             self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
