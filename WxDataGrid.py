@@ -589,13 +589,13 @@ class DataGrid():
 
         # If the col is a link col give it the look of a link
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
-            # Locate the "Display Name" column
-            if not "Display Name" in self.Datasource.ColHeaders:
-                assert False  # This should never happen
-            colnum=self.Datasource.ColHeaders.index("Display Name")
-            if icol < colnum:
-                self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
             # Is there a "Display Name" column?
+            if "Display Name" in self.Datasource.ColDefs:
+                colnum=self._datasource.ColHeaders.index("Display Name")
+                if icol < colnum:
+                    self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
+            else:
+                self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
 
         # If the column is not editable, color it light gray regardless of its value
         elif self._datasource.ColDefs[icol].IsEditable == IsEditable.No:
@@ -733,14 +733,13 @@ class DataGrid():
             self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
 
         elif self._datasource.Rows[irow].IsLinkRow:  # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
-            # Locate the "Display Name" column
-            if not "Display Name" in self._datasource.ColHeaders:
-                assert False  # This should never happen
-            colnum=self._datasource.ColHeaders.index("Display Name")
-            self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
-            self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
-
             # Is there a "Display Name" column?
+            if "Display Name" in self.Datasource.ColDefs:
+                colnum=self._datasource.ColHeaders.index("Display Name")
+                self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
+                self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
+            else:
+                self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
         else:
             self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
