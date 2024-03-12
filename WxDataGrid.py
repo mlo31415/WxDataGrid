@@ -223,7 +223,7 @@ class GridDataRowClass:
     def IsTextRow(self, val: bool) -> None:
         assert False
 
-    @abstractmethod
+    @property
     def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
         assert False
 
@@ -301,9 +301,6 @@ class GridDataSource():
     def AppendEmptyRows(self, num: int = 1) -> []:     # GridDataSource() abstract class
         self.InsertEmptyRows(self.NumRows, num)
         return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
-
-    def IsEmptyRow(self, i: int) -> bool:     # GridDataSource() abstract class
-        return self.Rows[i].IsEmptyRow()
 
     @abstractmethod
     def  InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
@@ -607,7 +604,7 @@ class DataGrid():
         else:
             # If it *is* editable or potentially editable, then color it according to its value
             # We skip testing for "str"-type columns since anything at all is OK in a str column
-            if not self._datasource.IsEmptyRow(irow):  # Don't bother filling in colors in completely empty rows
+            if not self._datasource.Rows[irow].IsEmptyRow:  # Don't bother filling in colors in completely empty rows
                 val=self._grid.GetCellValue(irow, icol)
                 if self._datasource.ColDefs[icol].Type == "int":
                     if val is not None and val != "" and not IsInt(val):
