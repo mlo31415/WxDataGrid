@@ -223,6 +223,10 @@ class GridDataRowClass:
     def IsTextRow(self, val: bool) -> None:
         assert False
 
+    @abstractmethod
+    def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
+        assert False
+
     @property
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     # GridDataRowClass (abstract class)
         return True
@@ -234,10 +238,6 @@ class GridDataRowClass:
     @abstractmethod
     def append(self, val):     # GridDataRowClass (abstract class)
         pass
-
-    @abstractmethod
-    def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
-        assert False
 
 
 # An abstract class which defines the structure of a data source for the Grid class
