@@ -228,6 +228,7 @@ class GridDataRowClass:
         assert False
 
     @property
+    @abstractmethod
     def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
         assert False
 
