@@ -308,7 +308,7 @@ class GridDataSource():
         return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
 
     @abstractmethod
-    def  InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
+    def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
         pass
 
     @property
