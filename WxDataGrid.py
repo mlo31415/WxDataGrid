@@ -39,11 +39,14 @@ class ColDefinition:
 
 
 
-
-@dataclass
 class ColDefinitionsList:
-    List: list[ColDefinition]
+    def __init__(self, coldefs: ColDefinition | list[ColDefinition]):
+        if isinstance(coldefs, list):
+            self.List: list[ColDefinition]=coldefs
+        else:
+            self.List=[coldefs]
 
+    # --------------------------
     # Implement 'in' as in "name" in ColDefinitionsList
     def __contains__(self, val: str) -> bool:       # ColDefinitionsList
         return any([x.Name == val or x.preferred == val for x in self.List])
@@ -53,6 +56,7 @@ class ColDefinitionsList:
     def __index__(self, val: str) -> int:       # ColDefinitionsList
         return self.index(val)
 
+    # --------------------------
     def index(self, val: str) -> int:       # ColDefinitionsList
         if val not in self: # Calls __contains__
             raise IndexError
