@@ -26,6 +26,36 @@ class ModalDialogManager():
         self._dlg.Destroy()
 
 
+# Usage: with ModalDialogManager(ProgressMessage2, message) as pm:
+class ProgressMessage2(object):
+    def __init__(self, *args, **kargs):
+        self._pm=ProgressMessage(args)
+        self._args=args[1:]
+        self._kargs=kargs
+        if "parent" in kargs:
+            self._pm._parent=kargs["parent"]
+            del kargs["parent"]
+        self._pm.Show(*args, **self._kargs)
+
+
+    def __enter__(self):
+        # self, s: str|None, close: bool=False, delay: float=0)
+        assert False
+
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self._pm.Close()
+
+
+    def Show(self, message: str|None, close: bool=False, delay: float=0):
+        self._pm.Show(message)
+        if delay > 0:
+            time.sleep(delay)
+
+    def Destroy(self):
+        self._pm.Close()
+
+
 #==============================================================
 # A class to display progress messages
 #       ProgressMessage(parent).Show(message)       # Display a message, creating a popup dialog if needed
@@ -75,22 +105,22 @@ class ProgressMessage(object):
             self._parent.SetFocus()
             self._parent.Raise()
 
-class ProgressMsg(object):
-    def __init__(self, parent: wx.TopLevelWindow | None, message: str, delay: float= 0.5) -> None:
-        self.pm=ProgressMessage(parent)
-        self._parent=parent
-        self.message=message
-        self.delay=delay
-
-    def __enter__(self):
-        self.pm.Show(self.message, delay=self.delay)
-        # If a parent has been defined, move the progress message to the parent's position
-        # This is handy when there's multiple monitors
-        if self._parent is not None:
-            self.pm._progressMessageDlg.SetPosition(self._parent.GetPosition())
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.pm.Close()
+# class ProgressMsg(object):
+#     def __init__(self, parent: wx.TopLevelWindow | None, message: str, delay: float= 0.5) -> None:
+#         self.pm=ProgressMessage(parent)
+#         self._parent=parent
+#         self.message=message
+#         self.delay=delay
+#
+#     def __enter__(self):
+#         self.pm.Show(self.message, delay=self.delay)
+#         # If a parent has been defined, move the progress message to the parent's position
+#         # This is handy when there's multiple monitors
+#         if self._parent is not None:
+#             self.pm._progressMessageDlg.SetPosition(self._parent.GetPosition())
+#
+#     def __exit__(self, exc_type, exc_val, exc_tb):
+#         self.pm.Close()
 
 
 # Returns True if processing should continue; False if it should end
