@@ -74,9 +74,8 @@ class ProgressMessage(object):
     def Show(self, s: str|None, close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
         if ProgressMessage._progressMessageDlg is None:
             ProgressMessage._progressMessageDlg=wx.ProgressDialog("progress", s, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
-        Log("ProgressMessage.Show('"+s+"')")
-        ProgressMessage._progressMessageDlg.Pulse(s)
         Log(f"ProgressMessage.Show('{s}')")
+        self._progressMessageDlg.Pulse(s)
 
         if close:
             self.Close(delay)
