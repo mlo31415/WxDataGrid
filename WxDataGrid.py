@@ -48,23 +48,23 @@ class ColDefinitionsList:
 
     # --------------------------
     # Implement 'in' as in "name" in ColDefinitionsList
-    def __contains__(self, val: str) -> bool:       # ColDefinitionsList
+    def __contains__(self, val: str) -> bool:       
         return any([x.Name == val or x.preferred == val for x in self.List])
 
     #--------------------------
     # Look up the index of a ColDefinition by name
-    def __index__(self, val: str) -> int:       # ColDefinitionsList
+    def __index__(self, val: str) -> int:       
         return self.index(val)
 
     # --------------------------
-    def index(self, val: str) -> int:       # ColDefinitionsList
+    def index(self, val: str) -> int:       
         if val not in self: # Calls __contains__
             raise IndexError
         return [x.Name == val or x.preferred == val for x in self.List].index(True)
 
     # --------------------------
     # Index can be a name or a list index
-    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:       # ColDefinitionsList
+    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:       
         if type(index) is str:     # The name of the column
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
@@ -76,7 +76,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __delitem__(self, index: Union[str, int, slice]) -> None:       # ColDefinitionsList
+    def __delitem__(self, index: Union[str, int, slice]) -> None:       
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -95,7 +95,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:       # ColDefinitionsList
+    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:       
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -119,14 +119,14 @@ class ColDefinitionsList:
 
         raise KeyError
 
-    def Signature(self) -> int:      # ColDefinitionsList
+    def Signature(self) -> int:      
         return sum((i+1)*x.Signature() for i, x in enumerate(self.List))
 
 
-    def __len__(self) -> int:       # ColDefinitionsList
+    def __len__(self) -> int:       
         return len(self.List)
 
-    def append(self, val: ColDefinition | ColDefinitionsList):       # ColDefinitionsList
+    def append(self, val: ColDefinition | ColDefinitionsList):       
         if type(val) is ColDefinition:
             self.List.append(val)
         elif type(val) is ColDefinitionsList:
@@ -135,14 +135,14 @@ class ColDefinitionsList:
             assert False
 
 
-    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       # ColDefinitionsList
+    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       
         return ColDefinitionsList(self.List+val.List)
 
-    def __iter__(self):       # ColDefinitionsList
+    def __iter__(self):       
         self._it=0
         return self
 
-    def __next__(self):       # ColDefinitionsList
+    def __next__(self):       
         if self._it == len(self.List):
             raise StopIteration
         val=self.List[self._it]

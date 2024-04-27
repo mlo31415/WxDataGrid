@@ -38,7 +38,7 @@ class ModalDialogManager():
 class ProgressMessage(object):
     _progressMessageDlg: wx.ProgressDialog=None
 
-    def __init__(self, parent: Optional[wx.TopLevelWindow]) -> None:
+    def __init__(self, parent: Optional[wx.TopLevelWindow]=None) -> None:
         self._parent=parent
 
     def Show(self, s: str|None, close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
@@ -112,7 +112,7 @@ def OnCloseHandling(event, needssaving: bool, msg: str) -> bool:
 # -*- coding: utf-8 -*-
 
 ###########################################################################
-## Python code generated with wxFormBuilder (version Oct 26 2018)
+## Python code generated with wxFormBuilder (version 3.10.1-0-g8feb16b3)
 ## http://www.wxformbuilder.org/
 ##
 ## PLEASE DO *NOT* EDIT THIS FILE!
@@ -193,6 +193,32 @@ def MessageBoxInput(s: str="", title="", initialValue: str="", ignoredebugger=Tr
             ret=dlg.m_textctl.Value
     finally:
         dlg.Destroy()
+    return ret
+
+
+def MessageBoxInpu2(prompt: str = "", title="", initialValue: str = "", ignoredebugger=True) -> str:
+    dlg=QueryDialog(None)
+    dlg.Title=title
+    dlg.wxLable.SetLabelText(prompt)
+
+    dlg.m_textctl =initialValue
+    ret=""
+    try:
+        if dlg.ShowModal() == wx.ID_OK:
+            ret=dlg.m_textctl.Value
+    finally:
+        dlg.Destroy()
+    return ret
+
+
+#------------------------------------------------------------------------
+# This one usefully resizes to display the whole title
+def wxMessageDialogInput(prompt: str="", title: str="", parent=None, initialValue: str="", ignoredebugger=True) -> str:
+    dlg=wx.TextEntryDialog(parent, prompt, caption=title, value=initialValue)
+    ret=""
+    if dlg.ShowModal() == wx.ID_OK:
+        ret=dlg.GetValue()
+    dlg.Destroy()
     return ret
 
 
