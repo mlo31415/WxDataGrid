@@ -76,6 +76,7 @@ class ProgressMessage(object):
             ProgressMessage._progressMessageDlg=wx.ProgressDialog("progress", s, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
         Log("ProgressMessage.Show('"+s+"')")
         ProgressMessage._progressMessageDlg.Pulse(s)
+        Log(f"ProgressMessage.Show('{s}')")
 
         if close:
             self.Close(delay)
