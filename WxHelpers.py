@@ -47,10 +47,11 @@ class ProgressMessage2(object):
         self._pm.Close()
 
 
-    def Show(self, message: str|None, close: bool=False, delay: float=0):
+    def Update(self, message: str|None, delay: float=0):
         self._pm.Show(message)
         if delay > 0:
             time.sleep(delay)
+
 
     def Destroy(self):
         self._pm.Close()
