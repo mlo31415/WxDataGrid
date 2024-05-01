@@ -600,11 +600,6 @@ class DataGrid():
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
             _, hrefcol=self.Datasource.TextAndHrefCols
             # Is there a "Display Name" column?
-            if "Display Name" in self.Datasource.ColDefs:
-                colnum=self._datasource.ColHeaders.index("Display Name")
-                if icol < colnum:
-            else:
-                self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
             self._grid.SetCellFont(irow, hrefcol, self._grid.GetCellFont(irow, icol).Underlined())
 
         # If the column is not editable, color it light gray regardless of its value
@@ -745,17 +740,22 @@ class DataGrid():
         if self._datasource.Rows[irow].IsTextRow:
             self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
 
-        elif self._datasource.Rows[irow].IsLinkRow:  # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
-            # Is there a "Display Name" column?
-            if "Display Name" in self.Datasource.ColDefs:
-                colnum=self._datasource.ColHeaders.index("Display Name")
-                self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
-                self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
-            else:
-                self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
+        # elif self._datasource.Rows[irow].IsLinkRow:  # If a grid allows IsLinkRow to be set, its Datasource must have a column labelled "Display Name"
+        #     textcol, hrefcol=self.Datasource.TextAndHrefCols
+        #     # Is there a "Display Name" column?
+        #     if "Display Name" in self.Datasource.ColDefs:
+        #         colnum=self._datasource.ColHeaders.index("Display Name")
+        #         # self._grid.SetCellSize(irow, icol, numrows, numcols)
+        #         if colnum > 0:
+        #             self._grid.SetCellSize(irow, 0, 1, colnum)  # Merge all the cells up to the display name column
+        #         if colnum < self.NumCols-1:
+        #             self._grid.SetCellSize(irow, colnum, 1, self.NumCols-colnum)  # Merge the rest the cells into a second column
+        #     else:
+        #         self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
         else:
             self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
 
+        # Fill in the cell values
         for icol in range(len(self._datasource.ColDefs)):
             val=self._datasource[irow][icol]
             if val is None:
