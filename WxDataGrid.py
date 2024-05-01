@@ -219,6 +219,9 @@ class GridDataRowClass:
     @property
     def IsLinkRow(self) -> bool:     # GridDataRowClass (abstract class)
         return False            # Override only if needed
+    @IsLinkRow.setter
+    def IsLinkRow(self, val) -> None:
+        assert False    # Needs to be implemented in derived class
 
     @property
     def IsTextRow(self) -> bool:     # GridDataRowClass (abstract class)
