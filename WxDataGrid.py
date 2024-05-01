@@ -7,7 +7,7 @@ from enum import Enum
 import wx
 import wx.grid
 
-from HelpersPackage import IsInt, ListBlockMove
+from HelpersPackage import IsInt, IsNumeric, ListBlockMove
 from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
 
@@ -613,6 +613,9 @@ class DataGrid():
                 val=self._grid.GetCellValue(irow, icol)
                 if self._datasource.ColDefs[icol].Type == "int":
                     if val is not None and val != "" and not IsInt(val):
+                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                if self._datasource.ColDefs[icol].Type == "float":
+                    if val is not None and val != "" and not IsNumeric(val):
                         self.SetCellBackgroundColor(irow, icol, Color.Pink)
                 elif self._datasource.ColDefs[icol].Type == "date range":
                     if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
