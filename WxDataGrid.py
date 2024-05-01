@@ -278,6 +278,10 @@ class GridDataSource():
         self._allowCellEdits=val
 
     @property
+    def TextAndHrefCols(self) -> (int, int):
+        assert False
+
+    @property
     def NumCols(self) -> int:     # GridDataSource() abstract class
         return len(self.ColDefs)
 
@@ -591,13 +595,14 @@ class DataGrid():
 
         # If the col is a link col give it the look of a link
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
+            _, hrefcol=self.Datasource.TextAndHrefCols
             # Is there a "Display Name" column?
             if "Display Name" in self.Datasource.ColDefs:
                 colnum=self._datasource.ColHeaders.index("Display Name")
                 if icol < colnum:
-                    self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Underlined())
             else:
                 self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
+            self._grid.SetCellFont(irow, hrefcol, self._grid.GetCellFont(irow, icol).Underlined())
 
         # If the column is not editable, color it light gray regardless of its value
         elif self._datasource.ColDefs[icol].IsEditable == IsEditable.No:
