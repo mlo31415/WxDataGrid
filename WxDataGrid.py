@@ -7,6 +7,7 @@ from enum import Enum
 import wx
 import wx.grid
 
+from Log import Log
 from HelpersPackage import IsInt, IsNumeric, ListBlockMove
 from WxHelpers import MessageBoxInput
 from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
@@ -676,9 +677,10 @@ class DataGrid():
 
     # ------------------
     def RefreshWxGridFromDatasource(self, RetainSelection=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
+        #Log("RefreshWxGridFromDatasource entered")
         selection=Selection(self._grid)
 
-        # When both StartRow and EndRow != -1, we want only a portion of the grid to be redisplayed.
+        # When both StartRow and EndRow != -1 or both StartCol and EndCol != -1, we want only a portion of the grid to be redisplayed.
         # We are saying:
         #   (1) that only the StartRow to EndRow rows may have changed and
         #   (2) That the number of rows is unchanged
@@ -696,9 +698,11 @@ class DataGrid():
 
         if StartRow != -1 and EndRow != -1 and StartRow <= EndRow and StartCol == -1 and EndCol == -1:
             # Reload the cells
+            #Log("RefreshWxGridFromDatasource ReloadRows started")
             for irow in range(StartRow, EndRow+1):
                 self.ReloadRow(irow)
             self.ColorCellsByValue()
+            #Log("RefreshWxGridFromDatasource ReloadRows ended")
             return
 
         # Likewise for columns
@@ -711,6 +715,7 @@ class DataGrid():
             self.SetColHeaders(self._datasource.ColDefs)
             return
 
+        #Log("RefreshWxGridFromDatasource stage #1")
         # Record the visible lines so we can make them visible again later
         visibleRows=[]
         if self._grid.NumberCols > 0:
@@ -721,19 +726,20 @@ class DataGrid():
         self._grid.ClearGrid()
         if self._grid.NumberRows > 0:
             self._grid.DeleteRows(0, self._grid.NumberRows)
-
+        #Log("RefreshWxGridFromDatasource stage #2")
         self.SetColHeaders(self._datasource.ColDefs)
-
         # Put in the requisite rows plus 5 spares
         self._grid.AppendRows(self._datasource.NumRows+5)
-
+        #Log("RefreshWxGridFromDatasource stage #4")
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
             self.ReloadRow(irow)
+        #Log("RefreshWxGridFromDatasource stage #5")
 
         self.ColorCellsByValue()
         self.AutoSizeColumns()
         #self._grid.AutoSize()
+        #Log("RefreshWxGridFromDatasource stage #6")
 
         if RetainSelection:
             selection.Restore(self._grid)
@@ -741,11 +747,14 @@ class DataGrid():
             if visibleRows:
                 self._grid.MakeCellVisible(min(visibleRows), 0)
                 self._grid.MakeCellVisible(max(visibleRows), 0)
+        #Log("RefreshWxGridFromDatasource Done")
+
 
 
     #--------------------------------------------------
     # Reload a specific row
     def ReloadRow(self, irow):
+
         if self._datasource.Rows[irow].IsTextRow:
             self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
 
@@ -763,6 +772,8 @@ class DataGrid():
         #         self._grid.SetCellSize(irow, 0, 1, self.NumCols)  # Make text rows all one cell
         else:
             self._grid.SetCellSize(irow, 0, 1, 1)  # Set as normal unspanned cell
+
+
 
         # Fill in the cell values
         for icol in range(len(self._datasource.ColDefs)):
