@@ -685,6 +685,15 @@ class DataGrid():
         #   (3) We do not need to change ths state of scrolling
         #   (4) We do not need to change the column headers or the column widths
         # This will most typically be used for moving a small block of rows up or down one row
+        if StartRow != -1 and EndRow != -1 and StartRow <= EndRow and StartCol != -1 and EndCol != -1 and StartCol <= EndCol:
+            # Reload the cells
+            for irow in range(StartRow, EndRow+1):
+                for icol in range(StartCol, EndCol+1):
+                    self.ReloadCell(irow, icol)
+            self.ColorCellsByValue()
+            self.SetColHeaders(self._datasource.ColDefs)
+            return
+
         if StartRow != -1 and EndRow != -1 and StartRow <= EndRow and StartCol == -1 and EndCol == -1:
             # Reload the cells
             for irow in range(StartRow, EndRow+1):
@@ -922,7 +931,7 @@ class DataGrid():
         self._datasource[row][col]=newVal
         #Log("set datasource("+str(cols)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
-        self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row)
+        self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row, StartCol=col, EndCol=col)
         self.AutoSizeColumns()
 
 
