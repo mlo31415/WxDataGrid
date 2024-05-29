@@ -651,11 +651,20 @@ class DataGrid():
 
 
     # --------------------------------------------------------
-    def ColorCellsByValue(self):        # DataGrid
-        # Analyze the data and highlight cells where the data type doesn't match the header.  (E.g., Volume='August', Month='17', year='20')
-        # Col 0 is a number and 3 is a date and the rest are strings.   We walk the rows checking the type of data in that column.
-        for iRow in range(self._grid.NumberRows):
-            for iCol in range(self._grid.NumberCols):
+    # Note that no specifying any of the arguments recolors everything
+    def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
+        # Analyze the data and highlight cells where the data type doesn't match the type specified by ColHeaders.  (E.g., Volume='August', Month='17', year='20')
+        if StartRow == -1:
+            StartRow=0
+        if EndRow == -1:
+            EndRow=self._grid.NumberRows
+        if StartCol == -1:
+            StartCol=0
+        if EndCol == -1:
+            EndCol=self._grid.NumberCols
+
+        for iRow in range(StartRow, EndRow):
+            for iCol in range(StartCol, EndCol):
                 self.ColorCellByValue(iRow, iCol)
 
     # --------------------------------------------------------
@@ -692,7 +701,7 @@ class DataGrid():
             for irow in range(StartRow, EndRow+1):
                 for icol in range(StartCol, EndCol+1):
                     self.ReloadCell(irow, icol)
-            self.ColorCellsByValue()
+            self.ColorCellsByValue(StartRow=StartRow, EndRow=EndRow, StartCol=StartCol, EndCol=EndCol)
             self.SetColHeaders(self._datasource.ColDefs)
             return
 
@@ -701,7 +710,7 @@ class DataGrid():
             #Log("RefreshWxGridFromDatasource ReloadRows started")
             for irow in range(StartRow, EndRow+1):
                 self.ReloadRow(irow)
-            self.ColorCellsByValue()
+            self.ColorCellsByValue(StartRow=StartRow, EndRow=EndRow)
             #Log("RefreshWxGridFromDatasource ReloadRows ended")
             return
 
@@ -711,7 +720,7 @@ class DataGrid():
             for irow in range(self.Datasource.NumRows):
                 for icol in range(StartCol, EndCol+1):
                     self.ReloadCell(irow, icol)
-            self.ColorCellsByValue()
+            self.ColorCellsByValue(StartCol=StartCol, EndCol=EndCol)
             self.SetColHeaders(self._datasource.ColDefs)
             return
 
@@ -1137,11 +1146,11 @@ class DataGrid():
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1 and top > 0:   # There must be a selection and it must have at least one cols open to the top
+            if top != -1 and top > 0:   # There must be a selection and it must have at least one col open to the top
                 if bottom < self.Datasource.NumRows:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
-                    self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom)
+                    self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom+1)
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
