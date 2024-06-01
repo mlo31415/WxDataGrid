@@ -54,7 +54,11 @@ class ColDefinitionsList:
 
     #--------------------------
     # Look up the index of a ColDefinition by name
-    def __index__(self, val: str) -> int:       
+    # Return -1 if missing
+    def __index__(self, val: str) -> int:
+        if val not in self:
+            return -1
+
         return self.index(val)
 
     # --------------------------
