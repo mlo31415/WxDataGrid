@@ -944,20 +944,23 @@ class DataGrid():
 
     #------------------
     def OnGridCellChanged(self, event):        # DataGrid
-        #self.EvtHandlerEnabled=False
+
         row=event.GetRow()
         col=event.GetCol()
+        newVal=self._grid.GetCellValue(row, col)
+
+        self.GridCellChangeProcessing(row, col, newVal)
+
+    def GridCellChangeProcessing(self, row: int, col: int, newVal: str):
 
         # If we're entering data in a new cols or a new column, append the necessary number of new rows and/or columns to the data source
         self.ExpandDataSourceToInclude(row, col)
 
-        newVal=self._grid.GetCellValue(row, col)
         self._datasource[row][col]=newVal
-        #Log("set datasource("+str(cols)+", "+str(col)+")="+newVal)
+        # Log("set datasource("+str(cols)+", "+str(col)+")="+newVal)
         self.ColorCellByValue(row, col)
         self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row, StartCol=col, EndCol=col)
         self.AutoSizeColumns()
-
 
     # ------------------
     def OnGridEditorShown(self, event):        # DataGrid
