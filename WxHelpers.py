@@ -212,16 +212,16 @@ class QueryDialog ( wx.Dialog ):
         self.EndModal(wx.ID_CANCEL)
 
 
-def MessageBoxInput(s: str="", title="", initialValue: str="", ignoredebugger=True) -> str:
+def MessageBoxInput(prompt: str="", title="", initialValue: str="", ignoredebugger=True) -> str:
     dlg=QueryDialog(None)
     dlg.Title=title
-    dlg.wxLable.LabelText=s
+    dlg.wxLable.SetLabelText(prompt)
 
-    dlg.m_textctl.Value=initialValue
+    dlg.m_textctl.SetValue(initialValue)
     ret=""
     try:
         if dlg.ShowModal() == wx.ID_OK:
-            ret=dlg.m_textctl.Value
+            ret=dlg.m_textctl.GetValue()
     finally:
         dlg.Destroy()
     return ret
@@ -232,14 +232,15 @@ def MessageBoxInpu2(prompt: str = "", title="", initialValue: str = "", ignorede
     dlg.Title=title
     dlg.wxLable.SetLabelText(prompt)
 
-    dlg.m_textctl =initialValue
+    dlg.m_textctl.SetValue(initialValue)
     ret=""
     try:
         if dlg.ShowModal() == wx.ID_OK:
-            ret=dlg.m_textctl.Value
+            ret=dlg.m_textctl.GetValue()
     finally:
         dlg.Destroy()
     return ret
+
 
 #------------------------------------------------------------------------
 # This one usefully resizes to display the whole title
