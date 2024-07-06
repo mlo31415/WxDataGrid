@@ -1157,7 +1157,7 @@ class DataGrid():
                 if bottom < self.Datasource.NumRows:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
-                    self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom+1)
+                    self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom)
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
