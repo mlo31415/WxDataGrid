@@ -158,58 +158,58 @@ import wx.xrc
 
 class QueryDialog ( wx.Dialog ):
 
-	def __init__( self, parent ):
-		wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.CLOSE_BOX|wx.DEFAULT_DIALOG_STYLE )
+    def __init__( self, parent ):
+        wx.Dialog.__init__ ( self, parent, id = wx.ID_ANY, title = wx.EmptyString, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.CLOSE_BOX|wx.DEFAULT_DIALOG_STYLE )
 
-		self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
+        self.SetSizeHints( wx.DefaultSize, wx.DefaultSize )
 
-		lable = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
+        lable = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, wx.EmptyString ), wx.VERTICAL )
 
-		self.wxLable = wx.StaticText( lable.GetStaticBox(), wx.ID_ANY, u"Enter the new column's name", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.wxLable.Wrap( -1 )
+        self.wxLable = wx.StaticText( lable.GetStaticBox(), wx.ID_ANY, u"Enter the new column's name", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.wxLable.Wrap( -1 )
 
-		lable.Add( self.wxLable, 0, wx.ALL, 5 )
+        lable.Add( self.wxLable, 0, wx.ALL, 5 )
 
-		self.m_textctl = wx.TextCtrl( lable.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_textctl.SetMinSize( wx.Size( 200,-1 ) )
+        self.m_textctl = wx.TextCtrl( lable.GetStaticBox(), wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_textctl.SetMinSize( wx.Size( 200,-1 ) )
 
-		lable.Add( self.m_textctl, 0, wx.ALL, 5 )
+        lable.Add( self.m_textctl, 0, wx.ALL, 5 )
 
-		fgSizer4 = wx.FlexGridSizer( 0, 2, 0, 0 )
-		fgSizer4.SetFlexibleDirection( wx.BOTH )
-		fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
+        fgSizer4 = wx.FlexGridSizer( 0, 2, 0, 0 )
+        fgSizer4.SetFlexibleDirection( wx.BOTH )
+        fgSizer4.SetNonFlexibleGrowMode( wx.FLEX_GROWMODE_SPECIFIED )
 
-		self.m_buttonOK = wx.Button( lable.GetStaticBox(), wx.ID_OK, u"OK", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_buttonOK = wx.Button( lable.GetStaticBox(), wx.ID_OK, u"OK", wx.DefaultPosition, wx.DefaultSize, 0 )
 
-		self.m_buttonOK.SetDefault()
-		fgSizer4.Add( self.m_buttonOK, 0, wx.ALL, 5 )
+        self.m_buttonOK.SetDefault()
+        fgSizer4.Add( self.m_buttonOK, 0, wx.ALL, 5 )
 
-		self.m_buttonCancel = wx.Button( lable.GetStaticBox(), wx.ID_CANCEL, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
-		fgSizer4.Add( self.m_buttonCancel, 0, wx.ALL, 5 )
-
-
-		lable.Add( fgSizer4, 1, wx.EXPAND, 5 )
+        self.m_buttonCancel = wx.Button( lable.GetStaticBox(), wx.ID_CANCEL, u"Cancel", wx.DefaultPosition, wx.DefaultSize, 0 )
+        fgSizer4.Add( self.m_buttonCancel, 0, wx.ALL, 5 )
 
 
-		self.SetSizer( lable )
-		self.Layout()
-		lable.Fit( self )
+        lable.Add( fgSizer4, 1, wx.EXPAND, 5 )
 
-		self.Centre( wx.BOTH )
 
-		# Connect Events
-		self.m_buttonOK.Bind( wx.EVT_BUTTON, self.OnOk )
-		self.m_buttonCancel.Bind( wx.EVT_BUTTON, self.OnCancel )
+        self.SetSizer( lable )
+        self.Layout()
+        lable.Fit( self )
 
-	def __del__( self ):
-		pass
+        self.Centre( wx.BOTH )
 
-	# Virtual event handlers, overide them in your derived class
-	def OnOk( self, event ):
-		self.EndModal(wx.ID_OK)
+        # Connect Events
+        self.m_buttonOK.Bind( wx.EVT_BUTTON, self.OnOk )
+        self.m_buttonCancel.Bind( wx.EVT_BUTTON, self.OnCancel )
 
-	def OnCancel( self, event ):
-		self.EndModal(wx.ID_CANCEL)
+    def __del__( self ):
+        pass
+
+    # Virtual event handlers, overide them in your derived class
+    def OnOk( self, event ):
+        self.EndModal(wx.ID_OK)
+
+    def OnCancel( self, event ):
+        self.EndModal(wx.ID_CANCEL)
 
 
 def MessageBoxInput(s: str="", title="", initialValue: str="", ignoredebugger=True) -> str:
