@@ -253,8 +253,8 @@ def wxMessageDialogInput(prompt: str="", title: str="", parent=None, initialValu
     return ret
 
 
-def wxMessageBox(message: str="..really ought to have a message!", caption: str="", parent=None, style=wx.OK):
-    wx.MessageDialog(parent, message, caption, style).ShowModal()
+def wxMessageBox(message: str="..really ought to have a message!", caption: str="", parent=None, style=wx.OK) -> int:
+    return wx.MessageDialog(parent, message, caption, style).ShowModal()
 
 
 #------------------------------------------------------------------------
