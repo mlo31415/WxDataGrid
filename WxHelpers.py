@@ -49,7 +49,9 @@ class ProgressMessage2(object):
 
     def Update(self, message: str|None, delay: float=0):
         self._pm.Show(message)
+        Log(f"Update: {message}")
         if delay > 0:
+            Log(f"Update: Delay({delay})")
             time.sleep(delay)
 
 
@@ -99,7 +101,9 @@ class ProgressMessage(object):
             return
 
         if delay > 0:
+            Log(f"ProgressMessage.Close({delay=})")
             time.sleep(delay)
+
         ProgressMessage._progressMessageDlg.WasCancelled()
         ProgressMessage._progressMessageDlg=None
         if self._parent is not None:
