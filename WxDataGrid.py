@@ -21,22 +21,26 @@ class IsEditable(Enum):
 
 
 #================================================================
-@dataclass
 class ColDefinition:
-    Name: str=""
-    Width: int=100
-    Type: str=""        # Empty is string, others are  "int", "date range",  "date", and "required str"
-    IsEditable: IsEditable=IsEditable.Yes
-    preferred: str=""
+    def __init__(self, Name: str="", Width: int=100, Type: str="str", IsEditable: IsEditable=IsEditable.Yes, Preferred: str=""):
+        self.Name=Name
+        self.Width=Width
+        self.Type=Type       # Empty is string, others are  "int", "date range",  "date", and "required str"
+        self.IsEditable=IsEditable
+        self._preferred=Preferred
+
 
     @property
     def Preferred(self) -> str:
-        if self.preferred != "":
-            return self.preferred
+        if self._preferred != "":
+            return self._preferred
         return self.Name
+    @Preferred.setter
+    def Preferred(self, val: str) -> None:
+        self._preferred=val
 
     def Signature(self) -> int:     # ColDefinition
-        return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self.preferred)
+        return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self._preferred)
 
 
 
@@ -50,7 +54,7 @@ class ColDefinitionsList:
     # --------------------------
     # Implement 'in' as in "name" in ColDefinitionsList
     def __contains__(self, val: str) -> bool:       
-        return any([x.Name == val or x.preferred == val for x in self.List])
+        return any([x.Name == val or x._preferred == val for x in self.List])
 
     #--------------------------
     # Look up the index of a ColDefinition by name
@@ -65,7 +69,7 @@ class ColDefinitionsList:
     def index(self, val: str) -> int:       
         if val not in self: # Calls __contains__
             raise IndexError
-        return [x.Name == val or x.preferred == val for x in self.List].index(True)
+        return [x.Name == val or x._preferred == val for x in self.List].index(True)
 
     # --------------------------
     # Index can be a name or a list index
@@ -73,7 +77,7 @@ class ColDefinitionsList:
         if type(index) is str:     # The name of the column
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
-            return [x for x in self.List if x.Name == index or x.preferred == index][0]
+            return [x for x in self.List if x.Name == index or x._preferred == index][0]
         if type(index) is int:
             return self.List[index]
         if type(index) is slice:
@@ -231,9 +235,7 @@ class GridDataRowClass:
     @property
     def IsTextRow(self) -> bool:     # GridDataRowClass (abstract class)
         return False            # Override only if needed
-    @IsTextRow.setter
-    def IsTextRow(self, val: bool) -> None:
-        assert False
+
 
     @property
     @abstractmethod
@@ -639,7 +641,7 @@ class DataGrid():
         if self._datasource.ColDefs[icol].Type == "url":
             val=self._grid.GetCellValue(irow, icol)
             font=self._grid.GetCellFont(irow, icol)
-            if val is not None and val != "" and self._datasource.Rows[irow].URL:
+            if val is not None and val != "": # and self._datasource.Rows[irow].URL:
                 self._grid.SetCellTextColour(irow, icol, Color.Blue)
                 font.MakeUnderlined()
                 self._grid.SetCellFont(irow, icol, font)
