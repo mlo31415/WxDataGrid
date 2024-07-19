@@ -1,6 +1,7 @@
 from typing import Optional
 import time
 import wx
+from wx import ID_YES
 from wx import _core
 
 from Log import Log
@@ -29,7 +30,7 @@ class ModalDialogManager():
 # Usage: with ModalDialogManager(ProgressMessage2, message) as pm:
 class ProgressMessage2(object):
     def __init__(self, *args, **kargs):
-        self._pm=ProgressMessage(args)
+        self._pm=ProgressMessage(args[0])
         self._args=args[1:]
         self._kargs=kargs
         if "parent" in kargs:
