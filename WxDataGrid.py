@@ -217,37 +217,37 @@ class GridDataRowClass:
 
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
     @abstractmethod
-    def Signature(self) -> int:     # GridDataRowClass (abstract class)
+    def Signature(self) -> int:     
         return 0
 
     # Get or set a value by name or column number in the grid
     @abstractmethod
-    def __getitem__(self, index: Union[int, slice]) -> str:     # GridDataRowClass (abstract class)
+    def __getitem__(self, index: Union[int, slice]) -> str:     
         pass
 
     @abstractmethod
-    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:     # GridDataRowClass (abstract class)
+    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:     
         pass
 
     @property
-    def IsLinkRow(self) -> bool:     # GridDataRowClass (abstract class)
+    def IsLinkRow(self) -> bool:     
         return False            # Override only if needed
     @IsLinkRow.setter
     def IsLinkRow(self, val) -> None:
         assert False    # Needs to be implemented in derived class
 
     @property
-    def IsTextRow(self) -> bool:     # GridDataRowClass (abstract class)
+    def IsTextRow(self) -> bool:     
         return False            # Override only if needed
 
 
     @property
     @abstractmethod
-    def IsEmptyRow(self) -> bool:     # GridDataRowClass (abstract class)
+    def IsEmptyRow(self) -> bool:     
         assert False
 
     @property
-    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     # GridDataRowClass (abstract class)
+    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     
         return True
     @abstractmethod
     def DelCol(self, icol) -> None:    # This *must* be implemented in the derived class because the data is so various
@@ -255,7 +255,7 @@ class GridDataRowClass:
 
     # This needs to be implemented only if the datasource allows the addition of new columns
     @abstractmethod
-    def append(self, val):     # GridDataRowClass (abstract class)
+    def append(self, val):     
         pass
 
 
