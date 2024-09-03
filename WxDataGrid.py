@@ -29,6 +29,10 @@ class ColDefinition:
         self.IsEditable=IsEditable
         self._preferred=Preferred
 
+    def __hash__(self):
+        return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self._preferred)
+    def Signature(self) -> int:
+        return self.__hash__()
 
     @property
     def Preferred(self) -> str:
@@ -38,10 +42,6 @@ class ColDefinition:
     @Preferred.setter
     def Preferred(self, val: str) -> None:
         self._preferred=val
-
-    def Signature(self) -> int:     # ColDefinition
-        return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self._preferred)
-
 
 
 class ColDefinitionsList:
@@ -55,6 +55,13 @@ class ColDefinitionsList:
     # Implement 'in' as in "name" in ColDefinitionsList
     def __contains__(self, val: str) -> bool:       
         return any([x.Name == val or x._preferred == val for x in self.List])
+
+
+    def __hash__(self) -> int:
+        return sum([hash(x)*(i+1) for i, x in enumerate(self.List)])
+    def Signature(self) -> int:
+        return self.__hash__()
+
 
     #--------------------------
     # Look up the index of a ColDefinition by name
@@ -127,9 +134,6 @@ class ColDefinitionsList:
             return
 
         raise KeyError
-
-    def Signature(self) -> int:      
-        return sum((i+1)*x.Signature() for i, x in enumerate(self.List))
 
 
     def __len__(self) -> int:       
