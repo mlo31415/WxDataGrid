@@ -418,7 +418,7 @@ class GridDataSource():
 ################################################################################
 class DataGrid():
 
-    def __init__(self, grid: wx.grid.Grid):         # DataGrid
+    def __init__(self, grid: wx.grid.Grid, ColorCellByValue: Optional[Callable[[int, int], None]]=None):         # DataGrid
         self._grid: wx.grid.Grid=grid
 
         self._datasource: GridDataSource=GridDataSource()
@@ -427,7 +427,7 @@ class DataGrid():
         self.clickedColumn: Optional[int]=None
         self.clickedRow: Optional[int]=None
         self.clickType: Optional[str]=None
-        self._ColorCellByValue: Optional[Callable[[int, int], None]]=None
+        self._colorCellByValue=ColorCellByValue
 
 
     # --------------------------------------------------------
@@ -655,8 +655,8 @@ class DataGrid():
                 self._grid.SetCellFont(irow, icol, font)
 
         # Finally, if an override was specified, give it a call
-        if callable(self._ColorCellByValue):
-            self._ColorCellByValue(icol, irow)
+        if callable(self._colorCellByValue):
+            self._colorCellByValue(icol, irow)
 
 
 
