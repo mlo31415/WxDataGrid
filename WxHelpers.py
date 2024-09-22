@@ -131,18 +131,18 @@ class ProgressMessage(object):
 
 # Returns True if processing should continue; False if it should end
 def OnCloseHandling(event, needssaving: bool, msg: str) -> bool:
-    if needssaving:
-        if event is None or type(event) == wx._core.CommandEvent:  # When the close event is None or is an ESC or the ID_Cancel button, it's not a veto-able event, so it needs to be handled separately
-            resp=wx.MessageBox(msg, 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
-            if resp == wx.CANCEL:
-                return True
-        elif event.CanVeto():
-            resp=wx.MessageBox(msg, 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
-            if resp == wx.CANCEL:
-                event.Veto()
-                return True
+    if not needssaving:
+        return False
 
-    return False
+    if event is None or type(event) == wx._core.CommandEvent:  # When the close event is None or is an ESC or the ID_Cancel button, it's not a veto-able event, so it needs to be handled separately
+        resp=wx.MessageBox(msg, 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if resp == wx.CANCEL:
+            return True
+    elif event.CanVeto():
+        resp=wx.MessageBox(msg, 'Warning', wx.OK|wx.CANCEL|wx.ICON_WARNING)
+        if resp == wx.CANCEL:
+            event.Veto()
+            return True
 
 
 # -*- coding: utf-8 -*-
