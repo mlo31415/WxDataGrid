@@ -642,7 +642,7 @@ class DataGrid():
                         self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
         # Special handling for URLs: we add an underline and paint the text blue
-        if self._datasource.ColDefs[icol].Type == "url":
+        if self._datasource.ColDefs[icol].Type == "url" and not self._datasource.Rows[irow].IsTextRow:
             val=self._grid.GetCellValue(irow, icol)
             font=self._grid.GetCellFont(irow, icol)
             if val is not None and val != "": # and self._datasource.Rows[irow].URL:
