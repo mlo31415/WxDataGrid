@@ -301,49 +301,49 @@ class GridDataSource():
 
     @property
     @abstractmethod
-    def NumRows(self) -> int:     # GridDataSource() abstract class
+    def NumRows(self) -> int:
         pass
 
     @abstractmethod
-    def __getitem__(self, index: int) -> GridDataRowClass:     # GridDataSource() abstract class
+    def __getitem__(self, index: int) -> GridDataRowClass:
         pass
 
     @abstractmethod
-    def __setitem__(self, index: int, val: GridDataRowClass) -> None:     # GridDataSource() abstract class
+    def __setitem__(self, index: int, val: GridDataRowClass) -> None:
         pass
 
     @property
     @abstractmethod
-    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.     # GridDataSource() abstract class
+    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.
         pass
     @Rows.setter
     @abstractmethod
-    def Rows(self, rows: list[GridDataRowClass]) -> None:     # GridDataSource() abstract class
+    def Rows(self, rows: list[GridDataRowClass]) -> None:
         pass
 
-    def AppendEmptyRows(self, num: int = 1) -> []:     # GridDataSource() abstract class
+    def AppendEmptyRows(self, num: int = 1) -> []:
         self.InsertEmptyRows(self.NumRows, num)
         return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
 
     @abstractmethod
-    def InsertEmptyRows(self, insertat: int, num: int=1) -> None:     # GridDataSource() abstract class
+    def InsertEmptyRows(self, insertat: int, num: int=1) -> None:
         pass
 
     @property
-    def CanAddColumns(self) -> bool:     # GridDataSource() abstract class
+    def CanAddColumns(self) -> bool:
         return False            # Override this if adding columns is allowed
 
     @property
-    def CanEditColumnHeaders(self) -> bool:     # GridDataSource() abstract class
+    def CanEditColumnHeaders(self) -> bool:
         return False            # Override this if editing the column headers is allowed
 
     @property
-    def CanMoveColumns(self) -> bool:     # GridDataSource() abstract class
+    def CanMoveColumns(self) -> bool:
         return True             # Override if columns can't be moved
 
 
     # Fnd the index of a possible header in the column header. -1 in not found
-    def ColHeaderIndex(self, s: str, CaseSensitive=False) -> int:     # GridDataSource() abstract class
+    def ColHeaderIndex(self, s: str, CaseSensitive=False) -> int:
         if CaseSensitive:
             if s in self.ColHeaders:
                 return self.ColHeaders.index(s)
@@ -356,7 +356,7 @@ class GridDataSource():
 
     # Insert a new column header.  NOTE: This does not insert the column in the data
     # An index of -1 appends
-    def InsertColumnHeader(self, index: int, cdef: str|ColDefinition) -> None:  # GridDataSource() abstract class
+    def InsertColumnHeader(self, index: int, cdef: str|ColDefinition) -> None:
         c=ColDefinitionsList([cdef])
         if index >= 0:
             self._colDefs=self._colDefs[:index]+c+self._colDefs[index:]
@@ -366,7 +366,7 @@ class GridDataSource():
 
     # Insert a new column including empty cells in the data.
     # An index of -1 appends
-    def InsertColumn(self, index: int, cdef: str | ColDefinition) -> None:     # GridDataSource() abstract class
+    def InsertColumn(self, index: int, cdef: str | ColDefinition) -> None:
         self.InsertColumnHeader(index, cdef)
 
         if index == -1:
@@ -378,13 +378,13 @@ class GridDataSource():
             row.Cells=row.Cells[:index]+[""]+row.Cells[index+1:]
 
 
-    def DeleteColumn(self, index: int) -> None:     # GridDataSource() abstract class
+    def DeleteColumn(self, index: int) -> None:
         self._colDefs=self._colDefs[:index]+self._colDefs[index+1:]
         for row in self.Rows:
             row.Cells=row.Cells[:index]+row.Cells[index+1:]
 
 
-    def MoveColumns(self, index: int, num: int, targetIndex: int) -> None:    # GridDataSource() abstract class
+    def MoveColumns(self, index: int, num: int, targetIndex: int) -> None:
         assert targetIndex < self.NumCols and targetIndex >= 0
 
         self._colDefs.List=ListBlockMove(self._colDefs.List, index, num, targetIndex)
@@ -395,7 +395,7 @@ class GridDataSource():
 
     # Take a box of cols/col indexes such as used in a selection: (top, left, bottom, right)
     # and limit it to the rows and columns actually currently defined
-    def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:     # GridDataSource() abstract class
+    def LimitBoxToActuals(self, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
         top, left, bottom, right=box
         if top < 0:
             top=0
@@ -408,10 +408,10 @@ class GridDataSource():
         return top, left, bottom, right
 
     @property
-    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?     # GridDataSource() abstract class
+    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?
         return None
     @SpecialTextColor.setter
-    def SpecialTextColor(self, val: Optional[Color]) -> None:     # GridDataSource() abstract class
+    def SpecialTextColor(self, val: Optional[Color]) -> None:
         return
 
 
