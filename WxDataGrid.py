@@ -661,7 +661,7 @@ class DataGrid():
 
 
     # --------------------------------------------------------
-    # Note that no specifying any of the arguments recolors everything
+    # Note that not specifying any of the arguments recolors everything
     def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
         # Analyze the data and highlight cells where the data type doesn't match the type specified by ColHeaders.  (E.g., Volume='August', Month='17', year='20')
         if StartRow == -1:
