@@ -408,10 +408,10 @@ class GridDataSource():
         return top, left, bottom, right
 
     @property
-    def SpecialTextColor(self) -> Optional[Color]:      #TODO: Is SpecialTextColor needed any more?
+    def SpecialTextColor(self) -> Color|None:
         return None
     @SpecialTextColor.setter
-    def SpecialTextColor(self, val: Optional[Color]) -> None:
+    def SpecialTextColor(self, val: Color|None) -> None:
         return
 
 
