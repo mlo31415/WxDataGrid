@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union, Optional, Callable
+from typing import Callable
 from dataclasses import dataclass
 from abc import abstractmethod
 from enum import Enum
@@ -80,7 +80,7 @@ class ColDefinitionsList:
 
     # --------------------------
     # Index can be a name or a list index
-    def __getitem__(self, index: Union[str, int, slice]) -> Union[ColDefinition, ColDefinitionsList]:       
+    def __getitem__(self, index: str|int|slice) -> ColDefinition|ColDefinitionsList:
         if type(index) is str:     # The name of the column
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
@@ -92,7 +92,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __delitem__(self, index: Union[str, int, slice]) -> None:       
+    def __delitem__(self, index: str|int|slice) -> None:
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -111,7 +111,7 @@ class ColDefinitionsList:
         raise KeyError
 
     #--------------------------
-    def __setitem__(self, index: Union[str, int, slice], value: ColDefinition) -> None:       
+    def __setitem__(self, index: str|int|slice, value: ColDefinition) -> None:
         if type(index) is str:      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
@@ -222,11 +222,11 @@ class GridDataRowClass:
 
     # Get or set a value by name or column number in the grid
     @abstractmethod
-    def __getitem__(self, index: Union[int, slice]) -> str:     
+    def __getitem__(self, index: int|slice) -> str:
         pass
 
     @abstractmethod
-    def __setitem__(self, index: Union[str, int, slice], value: Union[str, int, bool]) -> None:     
+    def __setitem__(self, index: str|int|slice, value: str|int|bool) -> None:
         pass
 
     @property
@@ -418,15 +418,15 @@ class GridDataSource():
 ################################################################################
 class DataGrid():
 
-    def __init__(self, grid: wx.grid.Grid, ColorCellByValue: Optional[Callable[[int, int], None]]=None):         # DataGrid
+    def __init__(self, grid: wx.grid.Grid, ColorCellByValue: Callable[[int, int], None]|None=None):         # DataGrid
         self._grid: wx.grid.Grid=grid
 
         self._datasource: GridDataSource=GridDataSource()
         self.clipboard=None         # The grid's clipboard
         self.cntlDown: bool=False         # There's no cntl-key currently down
-        self.clickedColumn: Optional[int]=None
-        self.clickedRow: Optional[int]=None
-        self.clickType: Optional[str]=None
+        self.clickedColumn: int|None=None
+        self.clickedRow: int|None=None
+        self.clickType: str|None=None
         self._colorCellByValue=ColorCellByValue
 
 
@@ -678,7 +678,7 @@ class DataGrid():
                 self.ColorCellByValue(iRow, iCol)
 
     # --------------------------------------------------------
-    def GetSelectedRowRange(self) -> Optional[tuple[int, int]]:        # DataGrid
+    def GetSelectedRowRange(self) -> tuple[int, int]|None:        # DataGrid
         rows=self._grid.GetSelectedRows()
         sel=self._grid.GetSelectionBlockTopLeft()
         if len(sel) > 0:
@@ -1096,7 +1096,7 @@ class DataGrid():
     #------------------------------------
     # Return a box which bounds all selections in the grid
     # Top, Left, Bottom, Right
-    def SelectionBoundingBox(self) -> Optional[tuple[int, int, int, int]]:        # DataGrid
+    def SelectionBoundingBox(self) -> tuple[int, int, int, int]|None:        # DataGrid
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return -1, -1, -1, -1
         top=99999

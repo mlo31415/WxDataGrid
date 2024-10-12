@@ -1,7 +1,5 @@
-from typing import Optional
 import time
 import wx
-from wx import ID_YES
 from wx import _core
 
 from Log import Log
@@ -72,7 +70,7 @@ class ProgressMessage2(object):
 class ProgressMessage(object):
     _progressMessageDlg: wx.ProgressDialog=None
 
-    def __init__(self, parent: Optional[wx.TopLevelWindow]=None) -> None:
+    def __init__(self, parent: wx.TopLevelWindow|None=None) -> None:
         self._parent=parent
 
     def Show(self, s: str|None, close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
