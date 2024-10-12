@@ -1151,7 +1151,7 @@ class DataGrid():
         elif event.KeyCode == 314 and self.HasSelection():      # Left arrow
             #print("**move left")
             left, right=self.ExtendColSelection()
-            if right != -1 and left > 0:   # There must be a selection and it must have at least one col open to the left
+            if right != -1 and left > 0:   # There must be a selection and there must be at least one col open to the left
                 if right < self.Datasource.NumCols:  # Entire block must be within defined cells
                     self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
                     self.SelectCols(left-1, right-1)
@@ -1159,7 +1159,7 @@ class DataGrid():
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
-            if top != -1 and top > 0:   # There must be a selection and it must have at least one col open to the top
+            if top != -1 and top > 0:   # There must be a selection there must be at least one col open to the top
                 if bottom < self.Datasource.NumRows:  # Entire block must be within defined cells
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
