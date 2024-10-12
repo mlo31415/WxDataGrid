@@ -418,7 +418,7 @@ class GridDataSource():
 ################################################################################
 class DataGrid():
 
-    def __init__(self, grid: wx.grid.Grid, ColorCellByValue: Callable[[int, int], None]|None=None):         # DataGrid
+    def __init__(self, grid: wx.grid.Grid, ColorSingleCellByValue: Callable[[int, int], None]|None=None):         # DataGrid
         self._grid: wx.grid.Grid=grid
 
         self._datasource: GridDataSource=GridDataSource()
@@ -427,7 +427,7 @@ class DataGrid():
         self.clickedColumn: int|None=None
         self.clickedRow: int|None=None
         self.clickType: str|None=None
-        self._colorCellByValue=ColorCellByValue
+        self._colorSingleCellByValue=ColorSingleCellByValue
 
 
     # --------------------------------------------------------
@@ -574,7 +574,7 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Row, col are Grid coordinates
-    def ColorCellByValue(self, irow: int, icol: int) -> None:        # DataGrid
+    def ColorSingleCellByValue(self, irow: int, icol: int) -> None:        # DataGrid
         # Start by setting color to white
         self.SetCellBackgroundColor(irow, icol, Color.White)
 
@@ -655,8 +655,8 @@ class DataGrid():
                 self._grid.SetCellFont(irow, icol, font)
 
         # Finally, if an override was specified, give it a call
-        if callable(self._colorCellByValue):
-            self._colorCellByValue(icol, irow)
+        if callable(self._colorSingleCellByValue):
+            self._colorSingleCellByValue(icol, irow)
 
 
 
@@ -964,7 +964,7 @@ class DataGrid():
 
         self._datasource[row][col]=newVal
         # Log("set datasource("+str(cols)+", "+str(col)+")="+newVal)
-        self.ColorCellByValue(row, col)
+        self.ColorSingleCellByValue(row, col)
         self.RefreshWxGridFromDatasource(StartRow=row, EndRow=row, StartCol=col, EndCol=col)
         self.AutoSizeColumns()
 
