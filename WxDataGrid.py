@@ -1153,9 +1153,10 @@ class DataGrid():
             left, right=self.ExtendColSelection()
             if right != -1 and left > 0:   # There must be a selection and there must be at least one col open to the left
                 if right < self.Datasource.NumCols:  # Entire block must be within defined cells
-                    self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
-                    self.SelectCols(left-1, right-1)
-                    self.RefreshWxGridFromDatasource(StartCol=left-1, EndCol=right)
+                    if self.Datasource.CanMoveColumns:
+                        self.MoveCols(left, right-left+1, left-1)     # And move 'em left 1
+                        self.SelectCols(left-1, right-1)
+                        self.RefreshWxGridFromDatasource(StartCol=left-1, EndCol=right)
 
         elif event.KeyCode == 315 and self.HasSelection():      # Up arrow
             top, bottom=self.ExtendRowSelection()
@@ -1169,9 +1170,10 @@ class DataGrid():
             #print("**move right")
             left, right=self.ExtendColSelection()
             if right != -1 and right < self.Datasource.NumCols-1:   # There must be a selection and at least one available col to the right
-                self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
-                self.SelectCols(left+1, right+1)
-                self.RefreshWxGridFromDatasource(StartCol=left, EndCol=right+1)
+                if self.Datasource.CanMoveColumns:
+                    self.MoveCols(left, right-left+1, left+1)     # And move 'em up 1
+                    self.SelectCols(left+1, right+1)
+                    self.RefreshWxGridFromDatasource(StartCol=left, EndCol=right+1)
 
         elif event.KeyCode == 317 and self.HasSelection():      # Down arrow
             top, bottom=self.ExtendRowSelection()
