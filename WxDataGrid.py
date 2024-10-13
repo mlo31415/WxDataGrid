@@ -695,9 +695,12 @@ class DataGrid():
         return None
 
     # ------------------
-    def RefreshWxGridFromDatasource(self, RetainSelection=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
+    def RefreshWxGridFromDatasource(self, RetainSelection: bool=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1, RetainCursorPos: bool=True):        # DataGrid
         #Log("RefreshWxGridFromDatasource entered")
         selection=Selection(self._grid)
+
+        cursrow=self._grid.GetGridCursorRow()
+        curscol=self._grid.GetGridCursorCol()
 
         # When both StartRow and EndRow != -1 or both StartCol and EndCol != -1, we want only a portion of the grid to be redisplayed.
         # We are saying:
@@ -759,6 +762,9 @@ class DataGrid():
         self.AutoSizeColumns()
         #self._grid.AutoSize()
         #Log("RefreshWxGridFromDatasource stage #6")
+
+        if RetainCursorPos:
+            self._grid.SetGridCursor(cursrow, curscol)
 
         if RetainSelection:
             selection.Restore(self._grid)
