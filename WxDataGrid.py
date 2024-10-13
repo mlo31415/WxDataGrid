@@ -661,20 +661,21 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Note that not specifying any of the arguments recolors everything
+    # Rows are inclusive (I.e., StartRow=1 and EndRow=2 colors both rows 1 and 2.
     def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
         # Analyze the data and highlight cells where the data type doesn't match the type specified by ColHeaders.  (E.g., Volume='August', Month='17', year='20')
         if StartRow == -1:
             StartRow=0
         if EndRow == -1:
-            EndRow=self._grid.NumberRows
+            EndRow=self._grid.NumberRows-1
         if StartCol == -1:
             StartCol=0
         if EndCol == -1:
-            EndCol=self._grid.NumberCols
+            EndCol=self._grid.NumberCols-1
 
-        for iRow in range(StartRow, EndRow):
-            for iCol in range(StartCol, EndCol):
-                self.ColorCellByValue(iRow, iCol)
+        for iRow in range(StartRow, EndRow+1):
+            for iCol in range(StartCol, EndCol+1):
+                self.ColorSingleCellByValue(iRow, iCol)
 
     # --------------------------------------------------------
     def GetSelectedRowRange(self) -> tuple[int, int]|None:        # DataGrid
