@@ -600,12 +600,11 @@ class DataGrid():
         # If the col is a text col and if there's a special text color
         # The special text color can be a color, which we then use to color the text or
         # It can be anything else, in which case we BOLD the text.
-        if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow and self._datasource.SpecialTextColor is not None:
+        if irow < self._datasource.NumRows and self._datasource.Rows[irow].IsTextRow:
             if self._datasource.SpecialTextColor is not None:
-                if type(self._datasource.SpecialTextColor) is Color:
-                    self.SetCellBackgroundColor(irow, icol, self._datasource.SpecialTextColor)
-                else:
-                    self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Bold())
+                self.SetCellBackgroundColor(irow, icol, self._datasource.SpecialTextColor)
+            else:
+                self._grid.SetCellFont(irow, icol, self._grid.GetCellFont(irow, icol).Bold())
 
         # If the col is a link col give it the look of a link
         elif irow < self._datasource.NumRows and self._datasource.Rows[irow].IsLinkRow:
