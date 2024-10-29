@@ -366,7 +366,9 @@ class GridDataSource():
 
     # Insert a new column including empty cells in the data.
     # An index of -1 appends
-    def InsertColumn(self, index: int, cdef: str | ColDefinition) -> None:
+    def InsertColumn(self, index: int, cdef: str|ColDefinition) -> None:
+        assert False    # The old code was wrong and dropped a cell[index].  Anything that calls this needs to be fixed and then to call InsertColumn2()
+    def InsertColumn2(self, index: int, cdef: str | ColDefinition) -> None:
         self.InsertColumnHeader(index, cdef)
 
         if index == -1:
@@ -375,7 +377,7 @@ class GridDataSource():
             return
 
         for row in self.Rows:
-            row.Cells=row.Cells[:index]+[""]+row.Cells[index+1:]
+            row.Cells=row.Cells[:index]+[""]+row.Cells[index:]
 
 
     def DeleteColumn(self, index: int) -> None:
