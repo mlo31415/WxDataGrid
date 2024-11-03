@@ -1340,7 +1340,8 @@ class DataGrid():
     # ------------------
     def HideRowLabels(self) -> None:       
         self._grid.HideRowLabels()
-
+    def ShowRowLabels(self) -> None:
+        self._grid.SetRowLabelSize(80)
 
     # ------------------
     def HideColLabels(self) -> None: 
