@@ -420,7 +420,7 @@ class GridDataSource():
 ################################################################################
 class DataGrid():
 
-    def __init__(self, grid: wx.grid.Grid, ColorSingleCellByValue: Callable[[int, int], None]|None=None):         # DataGrid
+    def __init__(self, grid: wx.grid.Grid, ColorSingleCellByValue: Callable[[int, int], None]|None=None):        
         self._grid: wx.grid.Grid=grid
 
         self._datasource: GridDataSource=GridDataSource()
@@ -434,7 +434,7 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Mark a cell as editable
-    def AllowCellEdit(self, irow: int, icol: int) -> None:        # DataGrid
+    def AllowCellEdit(self, irow: int, icol: int) -> None:       
         # Append this cell to the list of cells which are editable in spite of their default editability
         self._datasource.AllowCellEdits.append((irow, icol))
         # If necessary, append some empty lines to make this row a real row,
@@ -445,7 +445,7 @@ class DataGrid():
     # --------------------------------------------------------
     # Make text lines to be merged and editable
     # N.b., this may not actually be used anywhere and, hence, may not be tested
-    def MakeTextLinesEditable(self) -> None:        # DataGrid
+    def MakeTextLinesEditable(self) -> None:       
         for irow, row in enumerate(self._datasource.Rows):
             if row.IsTextRow or row.IsLinkRow:
                 for icol, ch in enumerate(self._datasource.ColDefs):
@@ -457,17 +457,17 @@ class DataGrid():
     # Get a cell value
     # Note that this does not change the underlying data
     @abstractmethod
-    def __getitem__(self, index: int):        # DataGrid
+    def __getitem__(self, index: int):       
         return self._grid[index]
 
     # --------------------------------------------------------
     @property
-    def NumCols(self) -> int:        # DataGrid
+    def NumCols(self) -> int:       
         return self._grid.NumberCols
     @NumCols.setter
     # Note that this actually changes the number of columns in the grid by adding or deleting from the end
     # It does not change the ColDefs
-    def NumCols(self, nCols: int) -> None:        # DataGrid
+    def NumCols(self, nCols: int) -> None:       
         if self._grid.NumberCols == nCols:
             return
         if self._grid.NumberCols > nCols:
@@ -477,12 +477,12 @@ class DataGrid():
 
     # --------------------------------------------------------
     @property
-    def NumRows(self) -> int:        # DataGrid
+    def NumRows(self) -> int:       
         return self._grid.NumberRows
 
     # --------------------------------------------------------
     @property
-    def Datasource(self) -> GridDataSource:         # DataGrid
+    def Datasource(self) -> GridDataSource:        
         return self._datasource
     @Datasource.setter
     def Datasource(self, val: GridDataSource):
@@ -490,17 +490,17 @@ class DataGrid():
 
     # --------------------------------------------------------
     @property
-    def Grid(self):        # DataGrid
+    def Grid(self):       
         return self._grid
 
     # --------------------------------------------------------
-    def AppendRows(self, nrows: int) -> None:        # DataGrid
+    def AppendRows(self, nrows: int) -> None:       
         self.ExpandDataSourceToInclude(self.NumRows+nrows)
 
     # --------------------------------------------------------
     # Insert one or more empty rows in the data source.
     # Then refresh the grid
-    def InsertEmptyRows(self, irow: int, nrows: int) -> None:        # DataGrid
+    def InsertEmptyRows(self, irow: int, nrows: int) -> None:       
         self.Datasource.InsertEmptyRows(irow, nrows)    # Insert the requisite number of rows at irow
 
         # Now update the editable status of non-editable columns
@@ -512,7 +512,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
     # --------------------------------------------------------
-    def DeleteRows(self, irow: int, numrows: int=1):        # DataGrid
+    def DeleteRows(self, irow: int, numrows: int=1):       
         if irow >= self.Datasource.NumRows:
             return
 
@@ -532,7 +532,7 @@ class DataGrid():
 
 
     # Scroll so as to make as many as possible of the rows visible
-    def MakeRowsVisible(self, rows: list[int]) -> None:         # DataGrid
+    def MakeRowsVisible(self, rows: list[int]) -> None:        
         # Find the bounding rows
         low=min(rows)
         high=max(rows)
@@ -546,12 +546,12 @@ class DataGrid():
 
 
     # --------------------------------------------------------
-    def AppendEmptyCols(self, ncols: int) -> None:        # DataGrid
+    def AppendEmptyCols(self, ncols: int) -> None:       
         self._grid.AppendCols(ncols)
 
 
     # --------------------------------------------------------
-    def SetColHeaders(self, coldefs: ColDefinitionsList) -> None:        # DataGrid
+    def SetColHeaders(self, coldefs: ColDefinitionsList) -> None:       
         # If necessary, change the grid to match the ColDefs
         self.NumCols=len(coldefs)
 
@@ -560,7 +560,7 @@ class DataGrid():
             self._grid.SetColLabelValue(i, cd.Preferred)
 
     # --------------------------------------------------------
-    def AutoSizeColumns(self):        # DataGrid
+    def AutoSizeColumns(self):       
         self._grid.AutoSizeColumns()
         if len(self._datasource.ColDefs) == self._grid.NumberCols-1:
             iCol=0
@@ -571,12 +571,12 @@ class DataGrid():
                 iCol+=1
 
     # --------------------------------------------------------
-    def SetCellBackgroundColor(self, irow: int, icol: int, color):        # DataGrid
+    def SetCellBackgroundColor(self, irow: int, icol: int, color):       
         self._grid.SetCellBackgroundColour(irow, icol, color)
 
     # --------------------------------------------------------
     # Row, col are Grid coordinates
-    def ColorSingleCellByValue(self, irow: int, icol: int) -> None:        # DataGrid
+    def ColorSingleCellByValue(self, irow: int, icol: int) -> None:       
         # Start by setting color to white
         self.SetCellBackgroundColor(irow, icol, Color.White)
 
@@ -683,7 +683,7 @@ class DataGrid():
     # --------------------------------------------------------
     # Note that not specifying any of the arguments recolors everything
     # Rows are inclusive (I.e., StartRow=1 and EndRow=2 colors both rows 1 and 2.
-    def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):        # DataGrid
+    def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):       
         # Analyze the data and highlight cells where the data type doesn't match the type specified by ColHeaders.  (E.g., Volume='August', Month='17', year='20')
         if StartRow == -1:
             StartRow=0
@@ -699,7 +699,7 @@ class DataGrid():
                 self.ColorSingleCellByValue(iRow, iCol)
 
     # --------------------------------------------------------
-    def GetSelectedRowRange(self) -> tuple[int, int]|None:        # DataGrid
+    def GetSelectedRowRange(self) -> tuple[int, int]|None:       
         rows=self._grid.GetSelectedRows()
         sel=self._grid.GetSelectionBlockTopLeft()
         if len(sel) > 0:
@@ -716,7 +716,7 @@ class DataGrid():
         return None
 
     # ------------------
-    def RefreshWxGridFromDatasource(self, RetainSelection: bool=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1, RetainCursorPos: bool=True):        # DataGrid
+    def RefreshWxGridFromDatasource(self, RetainSelection: bool=True, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1, RetainCursorPos: bool=True):       
         #Log("RefreshWxGridFromDatasource entered")
         selection=Selection(self._grid)
 
@@ -863,7 +863,7 @@ class DataGrid():
     # All cols numbers are logical
     # Oldrow is the 1st cols of the block to be moved
     # Newrow is the target position to which oldrow is moved
-    def MoveRows(self, oldrow: int, numrows: int, newrow: int):        # DataGrid
+    def MoveRows(self, oldrow: int, numrows: int, newrow: int):       
         rows=self._datasource.Rows
 
         dest=newrow
@@ -915,7 +915,7 @@ class DataGrid():
     # Oldcol is the 1st cols of the block to be moved
     # Numcols is the number of columns to be moved
     # Newcol is the target position to which oldrow is moved
-    def MoveCols(self, oldcol: int, numcols: int, newcol: int):        # DataGrid
+    def MoveCols(self, oldcol: int, numcols: int, newcol: int):       
         self.Datasource.ColDefs.List=ListBlockMove(self.Datasource.ColDefs.List, oldcol, numcols, newcol)
         self._grid.AllowCellEdits=ListBlockMove(self.Datasource.AllowCellEdits, oldcol, numcols, newcol)
         for row in self._datasource.Rows:
@@ -923,7 +923,7 @@ class DataGrid():
 
 
     # ------------------
-    def CopyCells(self, top: int, left: int, bottom: int, right: int) -> None:        # DataGrid
+    def CopyCells(self, top: int, left: int, bottom: int, right: int) -> None:       
         self.clipboard=[]
         for iRow in range(top, bottom+1):
             v=[]
@@ -933,7 +933,7 @@ class DataGrid():
 
 
     # ------------------
-    def PasteCells(self, top: int, left: int) -> None:        # DataGrid
+    def PasteCells(self, top: int, left: int) -> None:       
         # We paste the clipboard data into the block of the same size with the upper-left at the mouse's position
         # Might some of the new material be outside the current bounds?  If so, add some blank rows and/or columns
 
@@ -958,7 +958,7 @@ class DataGrid():
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
-    def ExpandDataSourceToInclude(self, irow: int, icol: int=0) -> None:        # DataGrid
+    def ExpandDataSourceToInclude(self, irow: int, icol: int=0) -> None:       
         assert irow >= 0 and icol >= 0
 
         # Add new rows if needed
@@ -976,7 +976,7 @@ class DataGrid():
 
 
     #------------------
-    def OnGridCellChanged(self, event):        # DataGrid
+    def OnGridCellChanged(self, event):       
 
         row=event.GetRow()
         col=event.GetCol()
@@ -996,7 +996,7 @@ class DataGrid():
         self.AutoSizeColumns()
 
     # ------------------
-    def OnGridEditorShown(self, event):        # DataGrid
+    def OnGridEditorShown(self, event):       
         irow=event.GetRow()
         icol=event.GetCol()
         if self.Datasource.ColDefs[icol].IsEditable == IsEditable.No:
@@ -1008,7 +1008,7 @@ class DataGrid():
 
 
     # ------------------
-    def OnGridLabelLeftClick(self, event):        # DataGrid
+    def OnGridLabelLeftClick(self, event):       
         self.SaveClickLocation(event)
 
         if self.clickedColumn >= 0:
@@ -1020,7 +1020,7 @@ class DataGrid():
             self._grid.SelectRow(self.clickedRow)
 
 
-    def DefaultPopupEnabler(self, event, popup) -> None:        # DataGrid
+    def DefaultPopupEnabler(self, event, popup) -> None:       
         self.SaveClickLocation(event, "right")
 
         # Set everything to disabled.
@@ -1042,7 +1042,7 @@ class DataGrid():
 
 
     # ------------------
-    def OnGridLabelRightClick(self, event, m_GridLabelPopup):        # DataGrid
+    def OnGridLabelRightClick(self, event, m_GridLabelPopup):       
         if m_GridLabelPopup is None:
             event.Skip()
         self.DefaultPopupEnabler(event, m_GridLabelPopup)
@@ -1052,27 +1052,27 @@ class DataGrid():
     # This records the column and cols and disables all the popup menu items
     # Then it enables copy and paste if appropriate.
     # Further handling is the responsibility of the application which called it
-    def OnGridCellRightClick(self, event, m_GridPopup):        # DataGrid
+    def OnGridCellRightClick(self, event, m_GridPopup):       
         self.SaveClickLocation(event, "right")
         self.DefaultPopupEnabler(event, m_GridPopup)
         event.Skip()    # Continue with default processing
 
 
     #-------------------
-    def OnGridCellDoubleClick(self, event):        # DataGrid
+    def OnGridCellDoubleClick(self, event):       
         self.SaveClickLocation(event, "double")
         event.Skip()    # Continue with default processing
 
 
     #-------------------
-    def OnGridCellLeftClick(self, event):        # DataGrid
+    def OnGridCellLeftClick(self, event):       
         self.SaveClickLocation(event, "left")
         event.Skip()    # Continue with default processing
 
 
     #------------------------------------
     # In many even handlers we need to save the click location
-    def SaveClickLocation(self, event, clicktype: str=""):        # DataGrid
+    def SaveClickLocation(self, event, clicktype: str=""):       
         self.clickedColumn=event.GetCol()
         self.clickedRow=event.GetRow()
         self.clickType=clicktype
@@ -1084,7 +1084,7 @@ class DataGrid():
     #   There is a selection block defined
     #   There is a SelectedCells defined
     #   There is a GridCursor location
-    def LocateSelection(self) -> tuple[int, int, int, int]:        # DataGrid
+    def LocateSelection(self) -> tuple[int, int, int, int]:       
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
             top, left=self._grid.SelectionBlockTopLeft[0]
             bottom, right=self._grid.SelectionBlockBottomRight[0]
@@ -1098,7 +1098,7 @@ class DataGrid():
 
 
     #------------------------------------
-    def HasSelection(self) -> bool:        # DataGrid
+    def HasSelection(self) -> bool:       
         if len(self._grid.SelectionBlockTopLeft) > 0 and len(self._grid.SelectionBlockBottomRight) > 0:
             return True
         if len(self._grid.SelectedCells) > 0:
@@ -1107,14 +1107,14 @@ class DataGrid():
 
 
     #------------------------------------
-    def SelectRows(self, top, bottom) -> None:        # DataGrid
+    def SelectRows(self, top, bottom) -> None:       
         self._grid.SelectRow(top)
         for i in range(top+1, bottom+1):
             self._grid.SelectRow(i, addToSelected = True)
 
 
     #------------------------------------
-    def SelectCols(self, left, right) -> None:        # DataGrid
+    def SelectCols(self, left, right) -> None:       
         self._grid.SelectCol(left)
         for i in range(left+1, right+1):
             self._grid.SelectCol(i, addToSelected = True)
@@ -1123,7 +1123,7 @@ class DataGrid():
     #------------------------------------
     # Return a box which bounds all selections in the grid
     # Top, Left, Bottom, Right
-    def SelectionBoundingBox(self) -> tuple[int, int, int, int]|None:        # DataGrid
+    def SelectionBoundingBox(self) -> tuple[int, int, int, int]|None:       
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return -1, -1, -1, -1
         top=99999
@@ -1142,7 +1142,7 @@ class DataGrid():
 
     #------------------------------------
     # Take the existing selected cells and extend the selection to the full rows
-    def ExtendRowSelection(self) -> tuple[int, int]:        # DataGrid
+    def ExtendRowSelection(self) -> tuple[int, int]:       
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return -1, -1
         top, _, bottom, _=self.SelectionBoundingBox()
@@ -1152,7 +1152,7 @@ class DataGrid():
 
     #------------------------------------
     # Take the existing selected cells and extend the selection to the full columns
-    def ExtendColSelection(self) -> tuple[int, int]:        # DataGrid
+    def ExtendColSelection(self) -> tuple[int, int]:       
         if len(self._grid.SelectionBlockTopLeft) == 0:
             return -1, -1
         _, left, _, right=self.SelectionBoundingBox()
@@ -1160,7 +1160,7 @@ class DataGrid():
         return left, right
 
     #-------------------
-    def OnKeyDown(self, event):        # DataGrid
+    def OnKeyDown(self, event):       
         top, left, bottom, right=self.LocateSelection()
 
         if event.KeyCode == 67 and self.cntlDown:   # cntl-C
@@ -1214,14 +1214,14 @@ class DataGrid():
             event.Skip()
 
     #-------------------
-    def OnKeyUp(self, event):        # DataGrid
+    def OnKeyUp(self, event):       
         if event.KeyCode == 308:                    # cntl
             self.cntlDown=False
 
 
     #------------------
     # Copy the selected cells into the clipboard object.
-    def OnPopupCopy(self, event):        # DataGrid
+    def OnPopupCopy(self, event):       
         self._grid.SaveEditControlValue()
         # (We can't simply store the coordinates because the user might edit the cells before pasting.)
         top, left, bottom, right=self.LocateSelection()
@@ -1231,14 +1231,14 @@ class DataGrid():
 
     #------------------
     # Paste the cells on the clipboard into the grid at the click location
-    def OnPopupPaste(self, event):        # DataGrid
+    def OnPopupPaste(self, event):       
         self._grid.SaveEditControlValue()
         top, left, _, _=self.LocateSelection()
         self.PasteCells(top, left)
 
 
     #------------------------------------
-    def OnPopupEraseSelection(self, event):        # DataGrid
+    def OnPopupEraseSelection(self, event):       
         self._grid.SaveEditControlValue()
         top, left, bottom, right=self.Datasource.LimitBoxToActuals(self.LocateSelection())
         for irow in range(top, bottom+1):
@@ -1249,7 +1249,7 @@ class DataGrid():
 
     #------------------------------------
     # Delete the selected columns
-    def DeleteSelectedColumns(self):        # DataGrid
+    def DeleteSelectedColumns(self):       
         self._grid.SaveEditControlValue()
         _, left, _, right=self.SelectionBoundingBox()
         if left == -1 or right == -1:
@@ -1266,7 +1266,7 @@ class DataGrid():
 
 
     #------------------------------------
-    def DeleteSelectedRows(self):        # DataGrid
+    def DeleteSelectedRows(self):       
         self._grid.SaveEditControlValue()
         top, _, bottom, _=self.SelectionBoundingBox()
         if top == -1 or bottom == -1:
@@ -1278,7 +1278,7 @@ class DataGrid():
 
 
     #------------------------------------
-    def OnPopupRenameCol(self, event):        # DataGrid
+    def OnPopupRenameCol(self, event):       
         self._grid.SaveEditControlValue()
         v=MessageBoxInput("Enter the new column name", title="Renaming column", ignoredebugger=True)
         if v is not None:
@@ -1288,7 +1288,7 @@ class DataGrid():
 
 
     #------------------------------------
-    def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:        # DataGrid
+    def InsertColumnMaybeQuery(self, icol: int, name: str= "") -> None:       
         self._grid.SaveEditControlValue()
         if name == "":
             name=MessageBoxInput("Enter the new column's name", title="Inserting column", ignoredebugger=True)
@@ -1303,7 +1303,7 @@ class DataGrid():
 
 
     #------------------------------------
-    def DeleteColumn(self, icol: int) -> None:        # DataGrid
+    def DeleteColumn(self, icol: int) -> None:       
         self._grid.SaveEditControlValue()
 
         for row in self.Datasource.Rows:
@@ -1326,22 +1326,22 @@ class DataGrid():
 
 
     #------------------------------------
-    def OnPopupInsertColLeft(self, event):        # DataGrid
+    def OnPopupInsertColLeft(self, event):       
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn-1)
 
 
     #------------------------------------
-    def OnPopupInsertColRight(self, event):        # DataGrid
+    def OnPopupInsertColRight(self, event):       
         self._grid.SaveEditControlValue()
         self.InsertColumnMaybeQuery(self.clickedColumn)
 
 
     # ------------------
-    def HideRowLabels(self) -> None:        # DataGrid
+    def HideRowLabels(self) -> None:       
         self._grid.HideRowLabels()
 
 
     # ------------------
-    def HideColLabels(self) -> None:  # DataGrid
+    def HideColLabels(self) -> None: 
         self._grid.HideColLabels()
