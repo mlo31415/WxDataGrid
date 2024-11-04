@@ -647,7 +647,7 @@ class DataGrid():
                                 "april", "may", "jun", "june", "jul", "july", "aug", "august",
                                 "sep", "sept", "september", "oct", "october", "nov", "november",
                                 "dec", "december", "fal", "fall", "autumn", "win", "winter", "spr", "spring", "sum", "summer"]
-                        if val.lower() not in months:
+                        if val.lower().strip() not in months:
                             self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
 
