@@ -10,7 +10,7 @@ import wx.grid
 from Log import Log
 from HelpersPackage import IsInt, IsNumeric, ListBlockMove
 from WxHelpers import MessageBoxInput
-from FanzineIssueSpecPackage import FanzineDateRange, FanzineDate
+from FanzineDateTime import FanzineDateRange, FanzineDate
 
 
 # Is this cell editable
