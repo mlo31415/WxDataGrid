@@ -772,7 +772,7 @@ class DataGrid():
         #Log("RefreshWxGridFromDatasource stage #2")
         self.SetColHeaders(self._datasource.ColDefs)
         # Put in the requisite rows plus 5 spares
-        self._grid.AppendRows(self._datasource.NumRows+5)
+        self._grid.AppendRows(self._datasource.NumRows+12)
         #Log("RefreshWxGridFromDatasource stage #4")
         # Fill in the cells
         for irow in range(self._datasource.NumRows):
