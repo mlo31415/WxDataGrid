@@ -498,8 +498,9 @@ class DataGrid():
         return self._grid
 
     # --------------------------------------------------------
-    def AppendRows(self, nrows: int) -> None:       
-        self.ExpandDataSourceToInclude(self.NumRows+nrows)
+    def AppendRows(self, nrows: int) -> None:
+        self.ExpandGridToInclude(nrows)
+        #self.ExpandDataSourceToInclude(self.NumRows+nrows)
 
     # --------------------------------------------------------
     # Insert one or more empty rows in the data source.
@@ -959,6 +960,11 @@ class DataGrid():
             for j, cellval in enumerate(row, start=pasteLeft):
                 self._datasource[i][j]=cellval
         self.RefreshWxGridFromDatasource(StartRow=pasteTop, EndRow=pasteBottom, StartCol=pasteLeft, EndCol=pasteRight)
+
+
+    def ExpandGridToInclude(self, irow: int, icol: int=0) -> None:
+        if self._grid.NumberRows < irow:
+            self._grid.AppendRows(irow+1-self._grid.NumberRows)
 
     # --------------------------------------------------------
     # Expand the grid's data source so that the local item (irow, icol) exists.
