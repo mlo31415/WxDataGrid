@@ -360,6 +360,8 @@ class GridDataSource():
     # Insert a new column header.  NOTE: This does not insert the column in the data
     # An index of -1 appends
     def InsertColumnHeader(self, index: int, cdef: str|ColDefinition) -> None:
+        if isinstance(cdef, str) :
+            cdef=ColDefinition(cdef)
         c=ColDefinitionsList([cdef])
         if index >= 0:
             self._colDefs=self._colDefs[:index]+c+self._colDefs[index:]
