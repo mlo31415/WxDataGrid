@@ -34,6 +34,9 @@ class ColDefinition:
     def Signature(self) -> int:
         return self.__hash__()
 
+    def Copy(self) -> ColDefinition:
+        return ColDefinition(self.Name, self.Width, self.Type, self.IsEditable, self._preferred)
+
     @property
     def Preferred(self) -> str:
         if self._preferred != "":
