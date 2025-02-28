@@ -7,7 +7,6 @@ from enum import Enum
 import wx
 import wx.grid
 
-from Log import Log
 from HelpersPackage import IsInt, IsNumeric, ListBlockMove
 from WxHelpers import MessageBoxInput
 from FanzineDateTime import FanzineDateRange, FanzineDate
