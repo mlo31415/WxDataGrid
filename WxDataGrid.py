@@ -57,7 +57,7 @@ class ColDefinitionsList:
     # --------------------------
     # Implement 'in' as in "name" in ColDefinitionsList
     def __contains__(self, val: str) -> bool:       
-        return any([x.Name == val or x._preferred == val for x in self.List])
+        return any([x.Name.lower() == val.lower() or x._preferred.lower() == val.lower() for x in self.List])
 
 
     def __hash__(self) -> int:
@@ -79,7 +79,7 @@ class ColDefinitionsList:
     def index(self, val: str) -> int:       
         if val not in self: # Calls __contains__
             raise IndexError
-        return [x.Name == val or x._preferred == val for x in self.List].index(True)
+        return [x.Name.lower() == val.lower() or x._preferred.lower() == val.lower() for x in self.List].index(True)
 
     # --------------------------
     # Index can be a name or a list index
