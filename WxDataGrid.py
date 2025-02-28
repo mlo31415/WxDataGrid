@@ -268,7 +268,7 @@ class GridDataSource():
     def __init__(self):     # GridDataSource() abstract class
         self._colDefs: ColDefinitionsList=ColDefinitionsList([])
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding an IsEditable.Maybe for the col
-        self._gridDataRowClass: GridDataRowClass=None
+        self._gridDataRowClass: GridDataRowClass|None=None
         # self.Rows must be supplied by the derived class
 
 
