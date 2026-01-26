@@ -82,8 +82,10 @@ class ColDefinitionsList:
 
     # --------------------------
     # Index can be a name or a list index
-    def __getitem__(self, index: str|int|slice) -> ColDefinition|ColDefinitionsList:
-        if type(index) is str:     # The name of the column
+    def __getitem__(self, index: str|int|slice|None) -> ColDefinition|ColDefinitionsList:
+        if index is None:
+            raise KeyError("ColDefinitionsList index cannot be None.")
+        if isinstance(index, str):     # The name of the column
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
             return [x for x in self.List if x.Name == index or x._preferred == index][0]
@@ -91,7 +93,7 @@ class ColDefinitionsList:
             return self.List[index]
         if isinstance(index, slice):
             return ColDefinitionsList(self.List[index])
-        raise KeyError
+        raise KeyError("ColDefinitionsList index cannot be whatever unexpected thing it was.")
 
     #--------------------------
     def __delitem__(self, index: str|int|slice) -> None:
@@ -110,7 +112,7 @@ class ColDefinitionsList:
             del self.List[index]
             return
 
-        raise KeyError
+        raise KeyError(f"ColDefinitionsList.__delitem__({index}) illegal index.")
 
     #--------------------------
     def __setitem__(self, index: str|int|slice, value: ColDefinition) -> None:
@@ -122,7 +124,7 @@ class ColDefinitionsList:
             if value.Name == "":
                 value.Name=index
             if value.Name != index:
-                raise ValueError
+                raise ValueError(f"ColDefinitionsList.__setitem__({index}, {value}) name mismatch.")
             self.List.append(value)
             return
 
@@ -135,7 +137,7 @@ class ColDefinitionsList:
         if isinstance(index, slice):
             return
 
-        raise KeyError
+        raise KeyError(f"ColDefinitionsList,__setitem__({index}) illegal index.")
 
 
     def __len__(self) -> int:       
@@ -147,7 +149,7 @@ class ColDefinitionsList:
         elif isinstance(val, ColDefinitionsList):
             self.List.extend(val.List)
         else:
-            assert False
+            raise Exception(f"ColDefinitionsList.append({val}) only accepts ColDefinition or ColDefinitionsList.")
 
 
     def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       
@@ -233,10 +235,10 @@ class GridDataRowClass:
 
     @property
     def IsLinkRow(self) -> bool:     
-        return False            # Override only if needed
+        raise NotImplementedError ("GridDataRowClass.IsLinkRow getter needs to be implemented in derived class.")           # Override only if needed
     @IsLinkRow.setter
     def IsLinkRow(self, val) -> None:
-        assert False    # Needs to be implemented in derived class
+        raise NotImplementedError ("GridDataRowClass.IsLinkRow setter needs to be implemented in derived class.")
 
     @property
     def IsTextRow(self) -> bool:     
@@ -244,9 +246,8 @@ class GridDataRowClass:
 
 
     @property
-    @abstractmethod
-    def IsEmptyRow(self) -> bool:     
-        assert False
+    def IsEmptyRow(self) -> bool:
+        raise NotImplementedError (f"GridDataRowClass.IsEmptyRow() should never be called.")
 
     @property
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     
@@ -296,6 +297,7 @@ class GridDataSource():
     @property
         assert False
     def TextAndHrefCols(self) -> tuple[int, int]:
+        raise AttributeError("GridDataSource.TextAndHrefCols getter should never be called.")
 
     @property
     def NumCols(self) -> int:     # GridDataSource() abstract class
@@ -304,24 +306,25 @@ class GridDataSource():
     @property
     @abstractmethod
     def NumRows(self) -> int:
-        pass
+        raise NotImplementedError ("GridDataSource.NumRows base class NumRows should never be called.")
 
     @abstractmethod
     def __getitem__(self, index: int) -> GridDataRowClass:
-        pass
+        raise NotImplementedError ("GridDataSource.__getitem__ base class __getitem__ should never be called.")
 
     @abstractmethod
     def __setitem__(self, index: int, val: GridDataRowClass) -> None:
-        pass
+        raise NotImplementedError ("GridDataSource.__setitem__ base class __setitem__ should never be called.")
 
     @property
     @abstractmethod
     def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.
         pass
+        raise NotImplementedError ("GridDataSource.Rows base class Rows getter should never be called.")
     @Rows.setter
     @abstractmethod
     def Rows(self, rows: list[GridDataRowClass]) -> None:
-        pass
+        raise NotImplementedError ("GridDataSource.Rows base class Rows setter should never be called.")
 
     def AppendEmptyRows(self, num: int = 1) -> []:
         self.InsertEmptyRows(self.NumRows, num)
@@ -329,7 +332,7 @@ class GridDataSource():
 
     @abstractmethod
     def InsertEmptyRows(self, insertat: int, num: int=1) -> None:
-        pass
+        raise NotImplementedError ("GridDataSource.InsertEmptyRows base class InsertEmptyRows should never be called.")
 
     @property
     def CanAddColumns(self) -> bool:
@@ -371,7 +374,7 @@ class GridDataSource():
     # Insert a new column including empty cells in the data.
     # An index of -1 appends
     def InsertColumn(self, index: int, cdef: str|ColDefinition) -> None:
-        assert False    # The old code was wrong and dropped overwrote cell[index].  Anything that calls this needs to be fixed and then to call InsertColumn2()
+        raise Exception("GridDataSource.InsertColumn is deprecated -- use InsertColumn2() instead.")
     def InsertColumn2(self, index: int, cdef: str | ColDefinition) -> None:
         self.InsertColumnHeader(index, cdef)
 

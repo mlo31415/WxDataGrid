@@ -40,7 +40,7 @@ class ProgressMessage2(object):
 
     def __enter__(self) -> None:
         # self, s: str|None, close: bool=False, delay: float=0)
-        assert False
+        raise Exception("ProgressMessage2.__enter__() is not implemented")
 
 
     def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
