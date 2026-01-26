@@ -720,7 +720,7 @@ class DataGrid():
             rows.append(cell[0])
 
         if len(rows) > 0:
-            return (min(rows), max(rows))
+            return min(rows), max(rows)
 
         return None
 
