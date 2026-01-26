@@ -528,7 +528,7 @@ class DataGrid():
         numrows=min(numrows, self.Datasource.NumRows-irow)  # If the request goes beyond the end of the data, ignore the extras
         del self.Datasource.Rows[irow:irow+numrows]
 
-        # We also need to drop entries in AllowCellEdits which refer to this cols and adjust the indexes of ones referring to all later rows
+        # We also need to drop entries in AllowCellEdits which refer to these cols and adjust the indexes of ones referring to all later rows
         for index, (i, j) in enumerate(self.Datasource.AllowCellEdits):
             if i >= irow:
                 if i < irow+numrows:

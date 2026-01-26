@@ -64,7 +64,7 @@ class ProgressMessage2(object):
 #       ProgressMessage(parent).Show(message)       # Display a message, creating a popup dialog if needed
 #       ProgressMessage(parent).Close(delay=sec)    # Delay sec seconds and then close the progress message
 # It may also be used as:
-#   with ProgressMessage(parent, "message", delay=1 as msg:
+#   with ProgressMessage(parent, "message", delay=1) as msg:
 #       ...
 #       ...
 #       etc.
