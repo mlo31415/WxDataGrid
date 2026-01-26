@@ -142,6 +142,7 @@ def OnCloseHandling(event, needssaving: bool, msg: str) -> bool:
         if resp == wx.CANCEL:
             event.Veto()
             return True
+    return False
 
 
 # -*- coding: utf-8 -*-
