@@ -87,9 +87,9 @@ class ColDefinitionsList:
             if index not in self: # Calls __contains__
                 return ColDefinition(Name=index)
             return [x for x in self.List if x.Name == index or x._preferred == index][0]
-        if type(index) is int:
+        if isinstance(index, int):
             return self.List[index]
-        if type(index) is slice:
+        if isinstance(index, slice):
             return ColDefinitionsList(self.List[index])
         raise KeyError
 
@@ -102,11 +102,11 @@ class ColDefinitionsList:
                 return
             raise IndexError
 
-        if type(index) is int:      # The index of the column
+        if isinstance(index, int):      # The index of the column
             del self.List[index]
             return
 
-        if type(index) is slice:
+        if isinstance(index, slice):
             del self.List[index]
             return
 
@@ -114,7 +114,7 @@ class ColDefinitionsList:
 
     #--------------------------
     def __setitem__(self, index: str|int|slice, value: ColDefinition) -> None:
-        if type(index) is str:      # The name of the column
+        if isinstance(index, str):      # The name of the column
             if index in self: # Calls __contains__
                 i=self.index(index)
                 self.List[i]=value
@@ -126,13 +126,13 @@ class ColDefinitionsList:
             self.List.append(value)
             return
 
-        if type(index) is int:      # The index of the column
+        if isinstance(index, int):      # The index of the column
             self.List[index]=value
             return
 
-        if type(index) is slice:
             assert index[2] == 0
             self.List=self.List[index[0]:index[1]]+[value]+self.List[index[1]:]
+        if isinstance(index, slice):
             return
 
         raise KeyError
@@ -142,9 +142,9 @@ class ColDefinitionsList:
         return len(self.List)
 
     def append(self, val: ColDefinition | ColDefinitionsList):       
-        if type(val) is ColDefinition:
+        if isinstance(val, ColDefinition):
             self.List.append(val)
-        elif type(val) is ColDefinitionsList:
+        elif isinstance(val, ColDefinitionsList):
             self.List.extend(val.List)
         else:
             assert False
