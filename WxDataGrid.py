@@ -28,7 +28,7 @@ class ColDefinition:
         self.IsEditable=IsEditable
         self._preferred=Preferred
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.Name)+hash(self.Width)+hash(self.Type)+hash(self.IsEditable)+hash(self._preferred)
     def Signature(self) -> int:
         return self.__hash__()
@@ -267,12 +267,12 @@ class GridDataSource():
     def __init__(self):     # GridDataSource() abstract class
         self._colDefs: ColDefinitionsList=ColDefinitionsList([])
         self._allowCellEdits: list[tuple[int, int]]=[]     # A list of cells where editing has been permitted by overriding an IsEditable.Maybe for the col
-        self._gridDataRowClass: GridDataRowClass|None=None
+        self._gridDataRowClass: type[GridDataRowClass]|None=None
         # self.Rows must be supplied by the derived class
 
 
     @property
-    def Element(self):     # GridDataSource() abstract class
+    def Element(self) -> type[GridDataRowClass]:     # GridDataSource() abstract class
         return self._gridDataRowClass
 
     @property
@@ -294,8 +294,8 @@ class GridDataSource():
         self._allowCellEdits=val
 
     @property
-    def TextAndHrefCols(self) -> (int, int):
         assert False
+    def TextAndHrefCols(self) -> tuple[int, int]:
 
     @property
     def NumCols(self) -> int:     # GridDataSource() abstract class
@@ -494,7 +494,7 @@ class DataGrid():
 
     # --------------------------------------------------------
     @property
-    def Grid(self):       
+    def Grid(self) -> wx.grid.Grid:
         return self._grid
 
     # --------------------------------------------------------
@@ -517,7 +517,7 @@ class DataGrid():
         self.RefreshWxGridFromDatasource()
 
     # --------------------------------------------------------
-    def DeleteRows(self, irow: int, numrows: int=1):       
+    def DeleteRows(self, irow: int, numrows: int=1) -> None:
         if irow >= self.Datasource.NumRows:
             return
 
@@ -565,7 +565,7 @@ class DataGrid():
             self._grid.SetColLabelValue(i, cd.Preferred)
 
     # --------------------------------------------------------
-    def AutoSizeColumns(self):       
+    def AutoSizeColumns(self) -> None:
         self._grid.AutoSizeColumns()
         if len(self._datasource.ColDefs) == self._grid.NumberCols-1:
             iCol=0
@@ -576,7 +576,7 @@ class DataGrid():
                 iCol+=1
 
     # --------------------------------------------------------
-    def SetCellBackgroundColor(self, irow: int, icol: int, color):       
+    def SetCellBackgroundColor(self, irow: int, icol: int, color) -> None:
         self._grid.SetCellBackgroundColour(irow, icol, color)
 
     # --------------------------------------------------------
