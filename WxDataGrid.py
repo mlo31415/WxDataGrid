@@ -636,40 +636,41 @@ class DataGrid():
             # We skip testing for "str"-type columns since anything at all is OK in a str column
             if not self._datasource.Rows[irow].IsEmptyRow:  # Don't bother filling in colors in completely empty rows
                 val=self._grid.GetCellValue(irow, icol)
-                if self._datasource.ColDefs[icol].Type == "int" or self._datasource.ColDefs[icol].Type == "day" or self._datasource.ColDefs[icol].Type == "year":
-                    if val is not None and val != "" and not IsInt(val):
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                if self._datasource.ColDefs[icol].Type == "float":
-                    if val is not None and val != "" and not IsNumeric(val):
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                elif self._datasource.ColDefs[icol].Type == "year":             # Year number is out of plausible range
-                    if IsInt(val) and (int(val) < 1926 or int(val) > 2050):
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                elif self._datasource.ColDefs[icol].Type == "day":             # Day number is out of plausible range
-                    if IsInt(val) and (int(val) < 1 or int(val) > 31):
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                elif self._datasource.ColDefs[icol].Type == "month":             # Month number is out of plausible range or month name is not recognized
-                    if (IsInt(val)):
-                        if int(val) < 1 or int(val) > 12:
+                if val is not None:
+                    if self._datasource.ColDefs[icol].Type == "int" or self._datasource.ColDefs[icol].Type == "day" or self._datasource.ColDefs[icol].Type == "year":
+                        if val != "" and not IsInt(val):
                             self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                    else:
-                        months=["", "jan", "january", "feb", "february", "mar", "march", "apr",
-                                "april", "may", "jun", "june", "jul", "july", "aug", "august",
-                                "sep", "sept", "september", "oct", "october", "nov", "november",
-                                "dec", "december", "fal", "fall", "autumn", "win", "winter", "spr", "spring", "sum", "summer"]
-                        if val.lower().strip() not in months:
+                    if self._datasource.ColDefs[icol].Type == "float":
+                        if val != "" and not IsNumeric(val):
                             self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "year":             # Year number is out of plausible range
+                        if IsInt(val) and (int(val) < 1926 or int(val) > 2050):
+                            self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "day":             # Day number is out of plausible range
+                        if IsInt(val) and (int(val) < 1 or int(val) > 31):
+                            self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "month":             # Month number is out of plausible range or month name is not recognized
+                        if IsInt(val):
+                            if int(val) < 1 or int(val) > 12:
+                                self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                        else:
+                            lowermonths=["", "jan", "january", "feb", "february", "mar", "march", "apr",
+                                    "april", "may", "jun", "june", "jul", "july", "aug", "august",
+                                    "sep", "sept", "september", "oct", "october", "nov", "november",
+                                    "dec", "december", "fal", "fall", "autumn", "win", "winter", "spr", "spring", "sum", "summer"]
+                            if val.lower().strip() not in lowermonths:
+                                self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
 
-                elif self._datasource.ColDefs[icol].Type == "date range":
-                    if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                elif self._datasource.ColDefs[icol].Type == "date":
-                    if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
-                elif self._datasource.ColDefs[icol].Type == "required str":
-                    if val is None or len(val) == 0:
-                        self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "date range":
+                        if val is not None and val != "" and FanzineDateRange().Match(val).IsEmpty():
+                            self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "date":
+                        if val is not None and val != "" and FanzineDate().Match(val).IsEmpty():
+                            self.SetCellBackgroundColor(irow, icol, Color.Pink)
+                    elif self._datasource.ColDefs[icol].Type == "required str":
+                        if val is None or len(val) == 0:
+                            self.SetCellBackgroundColor(irow, icol, Color.Pink)
 
         # Special handling for URLs: we add an underline and paint the text blue
         if self._datasource.ColDefs[icol].Type == "url" and not self._datasource.Rows[irow].IsTextRow:
