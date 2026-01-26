@@ -1,3 +1,4 @@
+from typing import Callable
 import time
 import wx
 from wx import _core
@@ -12,8 +13,8 @@ from Log import Log
 #   It deals with dlg.destroy()
 
 class ModalDialogManager():
-    def __init__(self, classType: callable, *args, **kargs):
-        self._class: callable=classType
+    def __init__(self, classType: Callable, *args, **kargs) -> None:
+        self._class: Callable=classType
         self._args=args
         self._kargs=kargs
 
@@ -21,13 +22,13 @@ class ModalDialogManager():
         self._dlg=self._class(*self._args, **self._kargs)
         return self._dlg
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         self._dlg.Destroy()
 
 
 # Usage: with ModalDialogManager(ProgressMessage2, message) as pm:
 class ProgressMessage2(object):
-    def __init__(self, *args, **kargs):
+    def __init__(self, *args, **kargs) -> None:
         self._pm=ProgressMessage(args[0])
         self._args=args[1:]
         self._kargs=kargs
@@ -37,16 +38,16 @@ class ProgressMessage2(object):
         self._pm.Show(*args, **self._kargs)
 
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         # self, s: str|None, close: bool=False, delay: float=0)
         assert False
 
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback) -> None:
         self._pm.Close()
 
 
-    def Update(self, message: str|None, delay: float=0):
+    def Update(self, message: str|None, delay: float=0) -> None:
         self._pm.Show(message)
         Log(f"Update: {message}")
         if delay > 0:
@@ -68,7 +69,7 @@ class ProgressMessage2(object):
 #       ...
 #       etc.
 class ProgressMessage(object):
-    _progressMessageDlg: wx.ProgressDialog=None
+    _progressMessageDlg: wx.ProgressDialog|None=None
 
     def __init__(self, parent: wx.TopLevelWindow|None=None) -> None:
         self._parent=parent
@@ -273,7 +274,7 @@ def AddChar(text: str, code) -> str:
 
 #------------------------------------------------------------------------
 # Process a new character entered into a wxPython text box
-def ProcessChar(text: str, code: int, cursorloc: int) -> (str, int):
+def ProcessChar(text: str, code: int, cursorloc: int) -> tuple[str, int]:
     match code:
         case wx.WXK_BACK:
             if cursorloc > 0:
