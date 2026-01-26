@@ -135,6 +135,9 @@ class ColDefinitionsList:
             assert index[2] == 0
             self.List=self.List[index[0]:index[1]]+[value]+self.List[index[1]:]
         if isinstance(index, slice):
+            if index.step != 0:
+                raise Exception(f"ColDefinitionsList.__setitem__() called with slice with non-zero step.")
+            self.List=self.List[index.start:index.stop]+[value]+self.List[index.stop:]
             return
 
         raise KeyError(f"ColDefinitionsList,__setitem__({index}) illegal index.")
