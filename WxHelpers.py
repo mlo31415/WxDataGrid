@@ -12,7 +12,7 @@ from Log import Log
 #       etc.
 #   It deals with dlg.destroy()
 
-class ModalDialogManager():
+class ModalDialogManager:
     def __init__(self, classType: Callable, *args, **kargs) -> None:
         self._class: Callable=classType
         self._args=args
