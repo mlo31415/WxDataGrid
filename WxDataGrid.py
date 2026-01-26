@@ -327,7 +327,7 @@ class GridDataSource():
     def Rows(self, rows: list[GridDataRowClass]) -> None:
         raise NotImplementedError ("GridDataSource.Rows base class Rows setter should never be called.")
 
-    def AppendEmptyRows(self, num: int = 1) -> []:
+    def AppendEmptyRows(self, num: int = 1) -> list:
         self.InsertEmptyRows(self.NumRows, num)
         return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
 
