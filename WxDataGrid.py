@@ -51,7 +51,7 @@ class ColDefinition:
 #================================================================
 # A class to store and manage a list of column definitions for a grid
 class ColDefinitionsList:
-    def __init__(self, coldefs: ColDefinition | list[ColDefinition]):
+    def __init__(self, coldefs: ColDefinition | list[ColDefinition]) -> None:
         if isinstance(coldefs, list):
             self.List: list[ColDefinition]=coldefs
         else:
@@ -105,17 +105,16 @@ class ColDefinitionsList:
             if index in self: # Calls __contains__
                 i=self.index(index)
                 del self.List[i]
-                return
-            raise IndexError
+                return None
             raise IndexError(f"ColDefinitionsList.__delitem__({index}) not found.")
 
         if isinstance(index, int):      # The index of the column
             del self.List[index]
-            return
+            return None
 
         if isinstance(index, slice):
             del self.List[index]
-            return
+            return None
 
         raise KeyError(f"ColDefinitionsList.__delitem__({index}) illegal index.")
 
@@ -125,7 +124,8 @@ class ColDefinitionsList:
             if index in self: # Calls __contains__
                 i=self.index(index)
                 self.List[i]=value
-                return
+                return None
+
             if value.Name == "":
                 value.Name=index
 
@@ -133,7 +133,7 @@ class ColDefinitionsList:
                 raise ValueError(f"ColDefinitionsList.__setitem__({index}, {value}) name mismatch.")
 
             self.List.append(value)
-            return
+            return None
 
         if isinstance(index, int):      # The index of the column
             self.List[index]=value
@@ -143,7 +143,7 @@ class ColDefinitionsList:
             if index.step != 0:
                 raise Exception(f"ColDefinitionsList.__setitem__() called with slice with non-zero step.")
             self.List=self.List[index.start:index.stop]+[value]+self.List[index.stop:]
-            return
+            return None
 
         raise KeyError(f"ColDefinitionsList,__setitem__({index}) illegal index.")
 
