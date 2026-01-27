@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Callable
+from typing import Callable, Self
 from dataclasses import dataclass
 from abc import abstractmethod
 from enum import Enum
@@ -144,7 +144,7 @@ class ColDefinitionsList:
     def __len__(self) -> int:       
         return len(self.List)
 
-    def append(self, val: ColDefinition | ColDefinitionsList):       
+    def append(self, val: ColDefinition | ColDefinitionsList) -> None:
         if isinstance(val, ColDefinition):
             self.List.append(val)
         elif isinstance(val, ColDefinitionsList):
@@ -156,11 +156,11 @@ class ColDefinitionsList:
     def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       
         return ColDefinitionsList(self.List+val.List)
 
-    def __iter__(self):       
+    def __iter__(self) -> Self:
         self._it=0
         return self
 
-    def __next__(self):       
+    def __next__(self) -> ColDefinition:
         if self._it == len(self.List):
             raise StopIteration
         val=self.List[self._it]
@@ -252,10 +252,12 @@ class GridDataRowClass:
 
     @property
     def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     
+    def CanDeleteColumns(self) -> bool:
         return True
     @abstractmethod
     def DelCol(self, icol) -> None:    # This *must* be implemented in the derived class because the data is so various
         pass
+    def DelCol(self, icol) -> None:
 
     # This needs to be implemented only if the datasource allows the addition of new columns
     @abstractmethod
