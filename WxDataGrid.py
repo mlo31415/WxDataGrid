@@ -19,7 +19,9 @@ class IsEditable(Enum):
     Maybe=3     # Not editable by default, but can be made editable
 
 
+
 #================================================================
+# A class containing the definition of a single column
 class ColDefinition:
     def __init__(self, Name: str="", Width: int=100, Type: str="str", IsEditable: IsEditable=IsEditable.Yes, Preferred: str=""):
         self.Name=Name
@@ -46,6 +48,8 @@ class ColDefinition:
         self._preferred=val
 
 
+#================================================================
+# A class to store and manage a list of column definitions for a grid
 class ColDefinitionsList:
     def __init__(self, coldefs: ColDefinition | list[ColDefinition]):
         if isinstance(coldefs, list):
@@ -123,8 +127,10 @@ class ColDefinitionsList:
                 return
             if value.Name == "":
                 value.Name=index
+
             if value.Name != index:
                 raise ValueError(f"ColDefinitionsList.__setitem__({index}, {value}) name mismatch.")
+
             self.List.append(value)
             return
 
@@ -169,6 +175,7 @@ class ColDefinitionsList:
 
 
 #================================================================
+# Some useful colors
 @dataclass(frozen=True)
 class Color:
      # Define some RGB color constants
@@ -182,7 +189,8 @@ class Color:
      Black=wx.Colour(0, 0, 0)
 
 
-# A class to store and restore a selection
+#================================================================
+# A class to store and restore a selection in the grid
 class Selection:
     def __init__(self, grid: wx.grid.Grid):
         self.selectedBlocks=grid.GetSelectedBlocks()
@@ -217,7 +225,8 @@ class Selection:
             print(f"{label}: selected cell({cell.x}, {cell.y})")
 
 
-# An abstract class defining a cols  of the GridDataSource
+#================================================================
+# An abstract class defining the columns of one row of the GridDataSource
 class GridDataRowClass:
 
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
@@ -226,7 +235,6 @@ class GridDataRowClass:
         return 0
 
     # Get or set a value by name or column number in the grid
-    @abstractmethod
     def __getitem__(self, index: int|slice) -> str:
         pass
 
@@ -251,12 +259,11 @@ class GridDataRowClass:
         raise NotImplementedError (f"GridDataRowClass.IsEmptyRow() should never be called.")
 
     @property
-    def CanDeleteColumns(self) -> bool:     # Override if column deletion is possible     
+    # Override if column deletion is possible. This defaults to True and needs to be overridden only if some columns are not deletable
     def CanDeleteColumns(self) -> bool:
         return True
-    @abstractmethod
-    def DelCol(self, icol) -> None:    # This *must* be implemented in the derived class because the data is so various
-        pass
+
+    # This *must* be implemented in the derived class because the data is so various no default is possible.
     def DelCol(self, icol) -> None:
 
     # This needs to be implemented only if the datasource allows the addition of new columns
@@ -265,6 +272,7 @@ class GridDataRowClass:
         pass
 
 
+#================================================================
 # An abstract class which defines the structure of a data source for the Grid class
 class GridDataSource():
 
