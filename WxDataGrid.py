@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Callable, Self
 from dataclasses import dataclass
-from abc import abstractmethod
 from enum import Enum
 
 import wx
@@ -231,15 +230,13 @@ class Selection:
 class GridDataRowClass:
 
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
-    @abstractmethod
-    def Signature(self) -> int:     
+    def Signature(self) -> int:
         raise NotImplementedError ("GridDataRowClass.Signature needs to be implemented in derived class.")
 
     # Get or set a value by name or column number in the grid
     def __getitem__(self, index: int|slice) -> str:
         raise NotImplementedError ("GridDataRowClass.__getitem__ needs to be implemented in derived class.")
 
-    @abstractmethod
     def __setitem__(self, index: str|int|slice, value: str|int|bool) -> None:
         raise NotImplementedError ("GridDataRowClass.__setitem__ needs to be implemented in derived class.")
 
@@ -269,8 +266,7 @@ class GridDataRowClass:
         raise NotImplementedError ("GridDataRowClass.DelCol() needs to be implemented in derived class.")
 
     # This needs to be implemented only if the datasource allows the addition of new columns
-    @abstractmethod
-    def append(self, val):     
+    def append(self, val):
         raise NotImplementedError ("GridDataRowClass.append() needs to be implemented in derived class.")
 
 
@@ -317,25 +313,19 @@ class GridDataSource():
         return len(self.ColDefs)
 
     @property
-    @abstractmethod
     def NumRows(self) -> int:
         raise NotImplementedError ("GridDataSource.NumRows base class NumRows should never be called.")
 
-    @abstractmethod
     def __getitem__(self, index: int) -> GridDataRowClass:
         raise NotImplementedError ("GridDataSource.__getitem__ base class __getitem__ should never be called.")
 
-    @abstractmethod
     def __setitem__(self, index: int, val: GridDataRowClass) -> None:
         raise NotImplementedError ("GridDataSource.__setitem__ base class __setitem__ should never be called.")
 
     @property
-    @abstractmethod
-    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements needs to be undefined since we don't know what they will be.
-        pass
+    def Rows(self) -> list[GridDataRowClass]:     # Types of list elements need to be undefined since we don't know what they will be.
         raise NotImplementedError ("GridDataSource.Rows base class Rows getter should never be called.")
     @Rows.setter
-    @abstractmethod
     def Rows(self, rows: list[GridDataRowClass]) -> None:
         raise NotImplementedError ("GridDataSource.Rows base class Rows setter should never be called.")
 
@@ -343,7 +333,6 @@ class GridDataSource():
         self.InsertEmptyRows(self.NumRows, num)
         return self.Rows[self.NumRows-num:]     # Return the list of newly-added rows
 
-    @abstractmethod
     def InsertEmptyRows(self, insertat: int, num: int=1) -> None:
         raise NotImplementedError ("GridDataSource.InsertEmptyRows base class InsertEmptyRows should never be called.")
 
@@ -474,12 +463,6 @@ class DataGrid():
                         self.AllowCellEdit(irow, icol)
 
 
-    # --------------------------------------------------------
-    # Get a cell value
-    # Note that this does not change the underlying data
-    @abstractmethod
-    def __getitem__(self, index: int):       
-        return self._grid[index]
 
     # --------------------------------------------------------
     @property
