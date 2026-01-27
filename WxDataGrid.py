@@ -248,9 +248,8 @@ class GridDataRowClass:
         raise NotImplementedError ("GridDataRowClass.IsLinkRow setter needs to be implemented in derived class.")   # This can only be defined int he derived class
 
     @property
-    def IsTextRow(self) -> bool:     
-        return False            # Override only if needed
-
+    def IsTextRow(self) -> bool:
+        return False    # This must be overridden in the derived class if it is possible for a row to be text
 
     @property
     def IsEmptyRow(self) -> bool:
