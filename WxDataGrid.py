@@ -160,7 +160,7 @@ class ColDefinitionsList:
             raise Exception(f"ColDefinitionsList.append({val}) only accepts ColDefinition or ColDefinitionsList.")
 
 
-    def __add__(self, val: ColDefinitionsList) ->ColDefinitionsList:       
+    def __add__(self, val: ColDefinitionsList) -> ColDefinitionsList:
         return ColDefinitionsList(self.List+val.List)
 
     def __iter__(self) -> Self:
