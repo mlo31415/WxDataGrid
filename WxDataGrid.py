@@ -81,7 +81,7 @@ class ColDefinitionsList:
     # --------------------------
     def index(self, val: str) -> int:       
         if val not in self: # Calls __contains__
-            raise IndexError
+            raise IndexError(f"ColDefinitionsList.index({val}) not found.")
         return [x.Name.lower() == val.lower() or x._preferred.lower() == val.lower() for x in self.List].index(True)
 
     # --------------------------
@@ -107,6 +107,7 @@ class ColDefinitionsList:
                 del self.List[i]
                 return
             raise IndexError
+            raise IndexError(f"ColDefinitionsList.__delitem__({index}) not found.")
 
         if isinstance(index, int):      # The index of the column
             del self.List[index]
@@ -232,22 +233,22 @@ class GridDataRowClass:
     # Note that *all* signature calculation takes place in the external code on the Datasource and not on the wx grid.
     @abstractmethod
     def Signature(self) -> int:     
-        return 0
+        raise NotImplementedError ("GridDataRowClass.Signature needs to be implemented in derived class.")
 
     # Get or set a value by name or column number in the grid
     def __getitem__(self, index: int|slice) -> str:
-        pass
+        raise NotImplementedError ("GridDataRowClass.__getitem__ needs to be implemented in derived class.")
 
     @abstractmethod
     def __setitem__(self, index: str|int|slice, value: str|int|bool) -> None:
-        pass
+        raise NotImplementedError ("GridDataRowClass.__setitem__ needs to be implemented in derived class.")
 
     @property
     def IsLinkRow(self) -> bool:     
-        raise NotImplementedError ("GridDataRowClass.IsLinkRow getter needs to be implemented in derived class.")           # Override only if needed
+        return False    # This must be overridden in the derived class if it is possible for a row to be a link
     @IsLinkRow.setter
     def IsLinkRow(self, val) -> None:
-        raise NotImplementedError ("GridDataRowClass.IsLinkRow setter needs to be implemented in derived class.")
+        raise NotImplementedError ("GridDataRowClass.IsLinkRow setter needs to be implemented in derived class.")   # This can only be defined int he derived class
 
     @property
     def IsTextRow(self) -> bool:     
@@ -265,11 +266,12 @@ class GridDataRowClass:
 
     # This *must* be implemented in the derived class because the data is so various no default is possible.
     def DelCol(self, icol) -> None:
+        raise NotImplementedError ("GridDataRowClass.DelCol() needs to be implemented in derived class.")
 
     # This needs to be implemented only if the datasource allows the addition of new columns
     @abstractmethod
     def append(self, val):     
-        pass
+        raise NotImplementedError ("GridDataRowClass.append() needs to be implemented in derived class.")
 
 
 #================================================================
