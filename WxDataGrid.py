@@ -303,7 +303,6 @@ class GridDataSource():
         self._allowCellEdits=val
 
     @property
-        assert False
     def TextAndHrefCols(self) -> tuple[int, int]:
         raise AttributeError("GridDataSource.TextAndHrefCols getter should never be called.")
 
