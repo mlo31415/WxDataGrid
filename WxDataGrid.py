@@ -921,7 +921,7 @@ class DataGrid():
     # Newcol is the target position to which oldrow is moved
     def MoveCols(self, oldcol: int, numcols: int, newcol: int):       
         self.Datasource.ColDefs.List=ListBlockMove(self.Datasource.ColDefs.List, oldcol, numcols, newcol)
-        self._grid.AllowCellEdits=ListBlockMove(self.Datasource.AllowCellEdits, oldcol, numcols, newcol)
+        self.Datasource.AllowCellEdits=ListBlockMove(self.Datasource.AllowCellEdits, oldcol, numcols, newcol)
         for row in self._datasource.Rows:
             row.Cells=ListBlockMove(row.Cells, oldcol, numcols, newcol)
 
