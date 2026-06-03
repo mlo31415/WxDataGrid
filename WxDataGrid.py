@@ -1329,7 +1329,7 @@ class DataGrid():
         elif icol == len(self.Datasource.ColDefs)-1:
             self.Datasource.ColDefs=self.Datasource.ColDefs[:-1]
         else:   # It's in the middle
-            self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+self.Datasource.ColDefs[icol:]
+            self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+self.Datasource.ColDefs[icol+1:]
 
         self.RefreshWxGridFromDatasource()
 
