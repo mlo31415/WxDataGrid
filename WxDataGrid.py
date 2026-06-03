@@ -908,7 +908,7 @@ class DataGrid():
         for i, (row, col) in enumerate(self._datasource.AllowCellEdits):
             try:
                 self._datasource.AllowCellEdits[i]=(permuter[row], col)
-            except:
+            except IndexError:
                 pass
         # Log("new editable rows: "+str(sorted(list(set([x[0] for x in self._datasource.AllowCellEdits])))))
 
