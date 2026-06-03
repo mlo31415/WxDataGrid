@@ -1326,9 +1326,9 @@ class DataGrid():
         # And now the column header
         if icol == 0:
             self.Datasource.ColDefs=self.Datasource.ColDefs[1:]
-        if icol == len(self.Datasource.ColDefs)-1:
+        elif icol == len(self.Datasource.ColDefs)-1:
             self.Datasource.ColDefs=self.Datasource.ColDefs[:-1]
-        else:
+        else:   # It's in the middle
             self.Datasource.ColDefs=self.Datasource.ColDefs[:icol]+self.Datasource.ColDefs[icol:]
 
         self.RefreshWxGridFromDatasource()
