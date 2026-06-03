@@ -55,7 +55,7 @@ class ProgressMessage2(object):
             time.sleep(delay)
 
 
-    def Destroy(self):
+    def Destroy(self) -> None:
         self._pm.Close()
 
 

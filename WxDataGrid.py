@@ -22,7 +22,7 @@ class IsEditable(Enum):
 #================================================================
 # A class containing the definition of a single column
 class ColDefinition:
-    def __init__(self, Name: str="", Width: int=100, Type: str="str", IsEditable: IsEditable=IsEditable.Yes, Preferred: str=""):
+    def __init__(self, Name: str="", Width: int=100, Type: str="str", IsEditable: IsEditable=IsEditable.Yes, Preferred: str="") -> None:
         self.Name=Name
         self.Width=Width
         self.Type=Type       # Empty is string, others are  "int", "date range",  "date", "year", "month", "day", and "required str"
