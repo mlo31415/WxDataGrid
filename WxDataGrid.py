@@ -1178,6 +1178,10 @@ class DataGrid():
         elif event.KeyCode == 86 and self.cntlDown and self.clipboard is not None and len(self.clipboard) > 0: # cntl-V
             self.PasteCells(top, left)
 
+        elif event.KeyCode == 65 and self.cntlDown:   # cntl-A: select all rows that have content
+            if self.Datasource.NumRows > 0:
+                self.SelectRows(0, self.Datasource.NumRows-1)
+
         elif event.KeyCode == 308:                  # cntl key alone
             self.cntlDown=True
 
