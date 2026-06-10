@@ -1205,6 +1205,10 @@ class DataGrid():
                     self.MoveRows(top, bottom-top+1, top-1)     # And move 'em up 1
                     self.SelectRows(top-1, bottom-1)
                     self.RefreshWxGridFromDatasource(StartRow=top-1, EndRow=bottom)
+                    # Near the top edge, keep one non-selected row visible above the moving block so a
+                    # group header scrolls into view before the block reaches it. (No-op mid-list.)
+                    if top-2 >= 0:
+                        self._grid.MakeCellVisible(top-2, 0)
 
         elif event.KeyCode == 316 and self.HasSelection():      # Right arrow
             #print("**move right")
@@ -1222,6 +1226,9 @@ class DataGrid():
                     self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
                     self.SelectRows(top+1, bottom+1)
                     self.RefreshWxGridFromDatasource(StartRow=top, EndRow=bottom+1)
+                    # Near the bottom edge, keep the bottom of the moving block visible (no margin row
+                    # below it, unlike the top). (No-op mid-list.)
+                    self._grid.MakeCellVisible(bottom+1, 0)
 
         else:
             event.Skip()
