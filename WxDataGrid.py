@@ -1014,10 +1014,62 @@ class DataGrid():
         if self.Datasource.ColDefs[icol].IsEditable == IsEditable.Maybe:
             if (irow, icol) not in self.Datasource.AllowCellEdits:
                 event.Veto()
+                return
+
+        # The cell is about to be edited: scroll it into view so the stock single-line editor isn't
+        # positioned partly outside the visible grid window (which would hide the text being edited).
+        self._grid.MakeCellVisible(irow, icol)
+
+        # The inline editor can't scroll back to show the start of a string that's longer than the cell.
+        # For those (rare) long values, skip the inline editor and edit in a simple wrapping popup instead.
+        if self._TextTooWideForCell(irow, icol, self._grid.GetCellValue(irow, icol)):
+            event.Veto()
+            wx.CallAfter(self._PopupEditLongText, irow, icol)
 
 
     # ------------------
-    def OnGridLabelLeftClick(self, event):       
+    # Is the cell's displayed text wider than the space the cell actually has? CellToRect accounts for
+    # merged cells (e.g. full-width text rows), so this measures against the real available width.
+    def _TextTooWideForCell(self, irow: int, icol: int, text: str) -> bool:
+        if not text:
+            return False
+        textWidth=self._grid.GetTextExtent(text).GetWidth()
+        # The editor can't show more than what's actually on screen, so the usable width is the smaller
+        # of the cell's own (possibly merged) width and the grid's visible width.
+        effectiveWidth=min(self._grid.CellToRect(irow, icol).GetWidth(), self._grid.GetClientSize().GetWidth())
+        return textWidth > effectiveWidth-8    # -8 leaves room for the cell's internal margin
+
+
+    # ------------------
+    # Edit a too-long cell value in a simple wrapping popup, then commit it through the normal path.
+    def _PopupEditLongText(self, irow: int, icol: int) -> None:
+        cur=self._datasource[irow][icol]
+        cur="" if cur is None else str(cur)
+        with wx.TextEntryDialog(self._grid, "Edit the cell's text:", "Edit long text",
+                                value=cur, style=wx.OK|wx.CANCEL|wx.TE_MULTILINE) as dlg:
+            # Centre the dialog over the cell being edited (so it's clear which cell is in play), then
+            # nudge it so the whole box stays on the display. CellToRect gives logical coords; convert
+            # to device coords and then to screen coords of the cell window.
+            cellRect=self._grid.CellToRect(irow, icol)
+            cellTopLeft=self._grid.GetGridWindow().ClientToScreen(self._grid.CalcScrolledPosition(cellRect.GetTopLeft()))
+            centreX=cellTopLeft.x+cellRect.GetWidth()//2
+            centreY=cellTopLeft.y+cellRect.GetHeight()//2
+            dlgW, dlgH=dlg.GetSize()
+            x=centreX-dlgW//2
+            y=centreY-dlgH//2
+            # Clamp to the display that holds the cell so no part of the dialog falls off-screen.
+            idx=wx.Display.GetFromPoint(wx.Point(centreX, centreY))
+            area=wx.Display(idx if idx != wx.NOT_FOUND else 0).GetClientArea()
+            x=max(area.x, min(x, area.x+area.width-dlgW))
+            y=max(area.y, min(y, area.y+area.height-dlgH))
+            dlg.SetPosition((x, y))
+            if dlg.ShowModal() == wx.ID_OK:
+                newVal=dlg.GetValue().replace("\r", "").replace("\n", " ")
+                self.GridCellChangeProcessing(irow, icol, newVal)
+
+
+    # ------------------
+    def OnGridLabelLeftClick(self, event):
         self.SaveClickLocation(event)
 
         if self.clickedColumn >= 0:
