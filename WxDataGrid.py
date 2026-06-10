@@ -1033,7 +1033,9 @@ class DataGrid():
     def _TextTooWideForCell(self, irow: int, icol: int, text: str) -> bool:
         if not text:
             return False
-        textWidth=self._grid.GetTextExtent(text).GetWidth()
+        # Measure with the cell's own font: heading/text rows are bold and so render wider than the
+        # grid's default font, and underestimating their width let long headings slip past this check.
+        textWidth=self._grid.GetFullTextExtent(text, self._grid.GetCellFont(irow, icol))[0]
         # The editor can't show more than what's actually on screen, so the usable width is the smaller
         # of the cell's own (possibly merged) width and the grid's visible width.
         effectiveWidth=min(self._grid.CellToRect(irow, icol).GetWidth(), self._grid.GetClientSize().GetWidth())
