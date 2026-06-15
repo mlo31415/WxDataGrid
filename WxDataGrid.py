@@ -209,9 +209,9 @@ class Selection:
         # But all these remaining selections have to be additive
         for block in self.selectedBlocks:
             grid.SelectBlock(block.TopLeft, block.BottomRight, True)
-        # I don't know how to deal with this right now...
-        if self.selectedCells:
-            print("self.selectedCells exception")
+        # Each individually-selected cell is just a 1x1 block; restore it the same additive way.
+        for cell in self.selectedCells:
+            grid.SelectBlock(cell, cell, True)
 
 
     def Print(self, label: str):      # Selection
