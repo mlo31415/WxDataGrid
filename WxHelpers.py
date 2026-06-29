@@ -145,6 +145,30 @@ def OnCloseHandling(event, needssaving: bool, msg: str) -> bool:
     return False
 
 
+# A three-way version of the unsaved-changes close prompt. Returns one of:
+#   "quit"   -- proceed to close, discarding the changes (also returned when there is nothing to save)
+#   "upload" -- the caller should upload/save the changes and then close
+#   "cancel" -- abort the close (a veto-able close event is also vetoed here)
+def OnCloseHandling3(event, needssaving: bool, msg: str) -> str:
+    if not needssaving:
+        return "quit"
+
+    dlg=wx.MessageDialog(None, msg, "Warning", wx.YES_NO|wx.CANCEL|wx.ICON_WARNING|wx.NO_DEFAULT)
+    dlg.SetYesNoCancelLabels("Exit Anyway", "Upload and Exit", "Cancel")
+    resp=dlg.ShowModal()
+    dlg.Destroy()
+
+    if resp == wx.ID_YES:       # "Exit Anyway"
+        return "quit"
+    if resp == wx.ID_NO:        # "Upload and Exit"
+        return "upload"
+
+    # "Cancel" (button, ESC, or the dialog's close box): abort, vetoing the event when it can be vetoed.
+    if event is not None and type(event) != wx._core.CommandEvent and event.CanVeto():
+        event.Veto()
+    return "cancel"
+
+
 # -*- coding: utf-8 -*-
 
 ###########################################################################
