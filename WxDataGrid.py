@@ -687,7 +687,7 @@ class DataGrid():
     # --------------------------------------------------------
     # Note that not specifying any of the arguments recolors everything
     # Rows are inclusive (I.e., StartRow=1 and EndRow=2 colors both rows 1 and 2.
-    def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):       
+    def ColorCellsByValue(self, StartRow: int=-1, EndRow: int=-1, StartCol: int=-1, EndCol: int=-1):
         # Analyze the data and highlight cells where the data type doesn't match the type specified by ColHeaders.  (E.g., Volume='August', Month='17', year='20')
         if StartRow == -1:
             StartRow=0
@@ -698,9 +698,16 @@ class DataGrid():
         if EndCol == -1:
             EndCol=self._grid.NumberCols-1
 
-        for iRow in range(StartRow, EndRow+1):
-            for iCol in range(StartCol, EndCol+1):
-                self.ColorSingleCellByValue(iRow, iCol)
+        # Batch the cell updates so the grid repaints once at the end instead of per-cell
+        self._grid.Freeze()
+        self._grid.BeginBatch()
+        try:
+            for iRow in range(StartRow, EndRow+1):
+                for iCol in range(StartCol, EndCol+1):
+                    self.ColorSingleCellByValue(iRow, iCol)
+        finally:
+            self._grid.EndBatch()
+            self._grid.Thaw()
 
     # --------------------------------------------------------
     def GetSelectedRowRange(self) -> tuple[int, int]|None:       
@@ -770,6 +777,10 @@ class DataGrid():
 
         scroll=self._grid.ScrollLineX
 
+        # Batch the whole rebuild so the grid repaints once at the end rather than per operation
+        self._grid.Freeze()
+        self._grid.BeginBatch()
+
         self._grid.ClearGrid()
         if self._grid.NumberRows > 0:
             self._grid.DeleteRows(0, self._grid.NumberRows)
@@ -797,6 +808,9 @@ class DataGrid():
             if visibleRows:
                 self._grid.MakeCellVisible(min(visibleRows), 0)
                 self._grid.MakeCellVisible(max(visibleRows), 0)
+
+        self._grid.EndBatch()
+        self._grid.Thaw()
         #Log("RefreshWxGridFromDatasource Done")
 
 
@@ -1277,7 +1291,7 @@ class DataGrid():
             top, bottom=self.ExtendRowSelection()
             if top != -1 and bottom < self.Datasource.NumRows-1:   # There must be a selection and at least one cols available beloe the selection's bottom
                 if bottom < self.NumRows-1:  # Entire block must be within defined cells
-                    self.MoveRows(top, bottom-top+1, top+1)     # And move 'em up 1
+                    self.MoveRows(top, bottom-top+1, top+1)     # And move 'em down 1
                     self.SelectRows(top+1, bottom+1)
                     self.RefreshWxGridFromDatasource(StartRow=top, EndRow=bottom+1)
                     # Near the bottom edge, keep the bottom of the moving block visible (no margin row
