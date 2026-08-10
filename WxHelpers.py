@@ -1,9 +1,46 @@
 from typing import Callable
+import os
 import time
 import wx
 from wx import _core
 
 from Log import Log
+
+
+# Set a top-level window's icon (title bar + taskbar) from an .ico file.
+# An icon is never worth a crash: if the file is missing or unusable this logs and returns quietly.
+def SetWindowIcon(win, iconpath: str) -> None:
+    try:
+        if not os.path.exists(iconpath):
+            return      # No icon supplied: perfectly OK, use the default
+        nolog=wx.LogNull()      # Suppress wx's own popup if the file isn't a valid icon
+        icon=wx.Icon(iconpath, wx.BITMAP_TYPE_ICO)
+        del nolog
+        if icon.IsOk():
+            win.SetIcon(icon)
+        else:
+            Log(f"SetWindowIcon: '{iconpath}' exists but is not a usable .ico file; using the default icon")
+    except Exception as e:
+        Log(f"SetWindowIcon: could not set icon from '{iconpath}': {e}")
+
+
+# Decorator: prevent a wx event handler (a method) from being re-entered.
+# Long blocking operations make impatient users click again; those clicks queue and are dispatched at the
+# next event-loop moment (e.g. a progress dialog's Update() or a gap between modal dialogs), re-entering the
+# handler while the first invocation is still mid-flight. A re-entrant call is ignored (and logged).
+# The flag is per-handler-per-window, so a guarded handler may still call a different guarded handler.
+def GuardReentry(func):
+    flagname="_inhandler_"+func.__name__
+    def wrapper(self, *args, **kwargs):
+        if getattr(self, flagname, False):
+            Log(f"GuardReentry: ignored re-entrant call to {func.__name__}")
+            return None
+        setattr(self, flagname, True)
+        try:
+            return func(self, *args, **kwargs)
+        finally:
+            setattr(self, flagname, False)
+    return wrapper
 
 
 # This is used:
