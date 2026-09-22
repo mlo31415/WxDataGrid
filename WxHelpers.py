@@ -111,11 +111,23 @@ class ProgressMessage(object):
     def __init__(self, parent: wx.TopLevelWindow|None=None) -> None:
         self._parent=parent
 
+    @staticmethod
+    def _CreateDialog(s: str|None) -> wx.ProgressDialog:
+        Log("ProgressMessage: creating the ProgressDialog")
+        return wx.ProgressDialog("progress", s, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
+
     def Show(self, s: str|None, close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
         if ProgressMessage._progressMessageDlg is None:
-            ProgressMessage._progressMessageDlg=wx.ProgressDialog("progress", s, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
+            ProgressMessage._progressMessageDlg=self._CreateDialog(s)
         Log(f"ProgressMessage.Show('{s}')")
-        self._progressMessageDlg.Pulse(s)
+        try:
+            ProgressMessage._progressMessageDlg.Pulse(s)
+        except Exception as e:
+            # The dialog has been destroyed out from under us (e.g. it was collected). Start a new one rather
+            # than letting a RuntimeError about a deleted C++ object escape into the caller's event handler.
+            Log(f"ProgressMessage.Show(): the ProgressDialog was gone ({e}); creating a new one")
+            ProgressMessage._progressMessageDlg=self._CreateDialog(s)
+            ProgressMessage._progressMessageDlg.Pulse(s)
 
         if close:
             self.Close(delay)
@@ -133,7 +145,8 @@ class ProgressMessage(object):
 
 
     def Close(self, delay: float=0) -> None:
-        if ProgressMessage._progressMessageDlg is None:
+        dlg=ProgressMessage._progressMessageDlg
+        if dlg is None:
             Log("ProgressMessage.Close() called without an existing ProgressDialog")
             return
 
@@ -141,8 +154,20 @@ class ProgressMessage(object):
             Log(f"ProgressMessage.Close({delay=})")
             time.sleep(delay)
 
-        ProgressMessage._progressMessageDlg.WasCancelled()
-        ProgressMessage._progressMessageDlg=None
+        # Destroy the dialog rather than just dropping the reference to it.
+        # It is PD_APP_MODAL, which disables input to *every* window in the application; the windows are
+        # re-enabled when it is destroyed. Merely abandoning it (which is what this used to do) leaves that to
+        # the garbage collector, so if anything still holds a reference -- an exception traceback pinning the
+        # frame it was created in is the usual culprit -- the application is left with its windows disabled and
+        # no visible dialog to dismiss: unresponsive to the keyboard and the mouse, with nothing to show for it.
+        ProgressMessage._progressMessageDlg=None    # Clear it first, so a re-entrant Close() can't double-destroy
+        try:
+            dlg.Hide()
+            dlg.Destroy()
+            Log("ProgressMessage: destroyed the ProgressDialog")
+        except Exception as e:
+            Log(f"ProgressMessage.Close(): could not destroy the ProgressDialog: {e}", isError=True)
+
         if self._parent is not None:
             self._parent.SetFocus()
             self._parent.Raise()
