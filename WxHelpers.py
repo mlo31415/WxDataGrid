@@ -24,6 +24,35 @@ def SetWindowIcon(win, iconpath: str) -> None:
         Log(f"SetWindowIcon: could not set icon from '{iconpath}': {e}")
 
 
+# Put a top-level window where it was last time, from a saved position and size (either may be None) -- unless that is
+# no longer on any connected screen (e.g. it was on a monitor which has since been unplugged), when it is centred on the
+# primary screen instead, shrunk if need be to fit. The test is whether enough of the title bar is on a screen to see it
+# and drag it: a window whose top is off-screen can't be moved back by hand. Dialogs centred on the window (as message
+# boxes and progress dialogs are) then appear on a visible screen too.
+def RestoreWindowPlacement(win, position, size) -> None:
+    if size:
+        win.SetSize(size)
+    if position:
+        win.SetPosition(position)
+    rect=win.GetRect()
+
+    titlebar=wx.Rect(rect.x, rect.y, rect.width, 30)
+    for i in range(wx.Display.GetCount()):
+        area=wx.Display(i).GetClientArea()
+        if titlebar.Intersects(area):
+            visible=titlebar.Intersect(area)
+            if visible.width >= min(100, rect.width) and visible.height >= 10:
+                return      # It's where it was, and on a screen: leave it there
+
+    displays=[wx.Display(i) for i in range(wx.Display.GetCount())]
+    primary=next((d for d in displays if d.IsPrimary()), displays[0])
+    area=primary.GetClientArea()
+    width, height=min(rect.width, area.width), min(rect.height, area.height)
+    win.SetSize(width, height)
+    win.SetPosition((area.x+(area.width-width)//2, area.y+(area.height-height)//2))
+    Log(f"RestoreWindowPlacement: the saved position {position} is not on any connected screen; centred on the primary screen instead")
+
+
 # Decorator: prevent a wx event handler (a method) from being re-entered.
 # Long blocking operations make impatient users click again; those clicks queue and are dispatched at the
 # next event-loop moment (e.g. a progress dialog's Update() or a gap between modal dialogs), re-entering the
