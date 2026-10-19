@@ -706,8 +706,10 @@ class DataGrid():
                 for iCol in range(StartCol, EndCol+1):
                     self.ColorSingleCellByValue(iRow, iCol)
         finally:
-            self._grid.EndBatch()
-            self._grid.Thaw()
+            try:
+                self._grid.EndBatch()
+            finally:
+                self._grid.Thaw()       # (Even if EndBatch raised, as wx's assertions do: see RefreshWxGridFromDatasource)
 
     # --------------------------------------------------------
     def GetSelectedRowRange(self) -> tuple[int, int]|None:       
@@ -780,37 +782,41 @@ class DataGrid():
         # Batch the whole rebuild so the grid repaints once at the end rather than per operation
         self._grid.Freeze()
         self._grid.BeginBatch()
+        try:
+            self._grid.ClearGrid()
+            if self._grid.NumberRows > 0:
+                self._grid.DeleteRows(0, self._grid.NumberRows)
+            #Log("RefreshWxGridFromDatasource stage #2")
+            self.SetColHeaders(self._datasource.ColDefs)
+            # Put in the requisite rows plus 5 spares
+            self._grid.AppendRows(self._datasource.NumRows+12)
+            #Log("RefreshWxGridFromDatasource stage #4")
+            # Fill in the cells
+            for irow in range(self._datasource.NumRows):
+                self.ReloadRow(irow)
+            #Log("RefreshWxGridFromDatasource stage #5")
 
-        self._grid.ClearGrid()
-        if self._grid.NumberRows > 0:
-            self._grid.DeleteRows(0, self._grid.NumberRows)
-        #Log("RefreshWxGridFromDatasource stage #2")
-        self.SetColHeaders(self._datasource.ColDefs)
-        # Put in the requisite rows plus 5 spares
-        self._grid.AppendRows(self._datasource.NumRows+12)
-        #Log("RefreshWxGridFromDatasource stage #4")
-        # Fill in the cells
-        for irow in range(self._datasource.NumRows):
-            self.ReloadRow(irow)
-        #Log("RefreshWxGridFromDatasource stage #5")
+            self.ColorCellsByValue()
+            self.AutoSizeColumns()
+            #self._grid.AutoSize()
+            #Log("RefreshWxGridFromDatasource stage #6")
 
-        self.ColorCellsByValue()
-        self.AutoSizeColumns()
-        #self._grid.AutoSize()
-        #Log("RefreshWxGridFromDatasource stage #6")
+            if RetainCursorPos:
+                self._grid.SetGridCursor(cursrow, curscol)
 
-        if RetainCursorPos:
-            self._grid.SetGridCursor(cursrow, curscol)
-
-        if RetainSelection:
-            selection.Restore(self._grid)
-            # Make the lines which were visible before we messed with things visible again
-            if visibleRows:
-                self._grid.MakeCellVisible(min(visibleRows), 0)
-                self._grid.MakeCellVisible(max(visibleRows), 0)
-
-        self._grid.EndBatch()
-        self._grid.Thaw()
+            if RetainSelection:
+                selection.Restore(self._grid)
+                # Make the lines which were visible before we messed with things visible again
+                if visibleRows:
+                    self._grid.MakeCellVisible(min(visibleRows), 0)
+                    self._grid.MakeCellVisible(max(visibleRows), 0)
+        finally:
+            # Always end the batch and thaw, even if something above (or EndBatch itself) raised: otherwise the grid is
+            # left frozen, never repaints again, and the program looks hung until it's restarted
+            try:
+                self._grid.EndBatch()
+            finally:
+                self._grid.Thaw()
         #Log("RefreshWxGridFromDatasource Done")
 
 
