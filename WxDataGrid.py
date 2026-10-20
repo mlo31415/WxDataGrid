@@ -191,38 +191,30 @@ class Color:
 
 #================================================================
 # A class to store and restore a selection in the grid
+# wx keeps every selection -- whole rows and columns, blocks, single cells -- as blocks; its selected rows, columns and
+# cells are other views of those same blocks. So only the blocks are kept, each once. (Restoring the cells and rows as well
+# put each selection back two or three times, so it doubled with every grid refresh: after a dozen keystrokes in FE's
+# search box, one selected cell was 4,096 blocks and a refresh took 9 s. Edie, 2026-10-19.)
 class Selection:
     def __init__(self, grid: wx.grid.Grid):
-        self.selectedBlocks=grid.GetSelectedBlocks()
-        self.selectedCols=grid.GetSelectedCols()
-        self.selectedRows=grid.GetSelectedRows()
-        self.selectedCells=grid.GetSelectedCells()
+        self.selectedBlocks: list[tuple[int, int, int, int]]=list(dict.fromkeys(
+            (b.TopRow, b.LeftCol, b.BottomRow, b.RightCol) for b in grid.GetSelectedBlocks()))     # (top, left, bottom, right)
 
 
+    # Blocks now partly past the end of the grid are cut short, and ones wholly past it dropped: selecting a row the grid
+    # no longer has makes wx fail an assertion ("GetRowPos(): invalid row index") when it next draws the grid.
     def Restore(self, grid: wx.grid.Grid):      # Selection
         grid.ClearSelection()
-        for row in self.selectedRows:
-            grid.SelectRow(row, addToSelected=True)
-        for col in self.selectedCols:
-            grid.SelectCol(col, addToSelected=True)
-        # The first two are mutually exclusive, so we can select without preserving previous selections.
-        # But all these remaining selections have to be additive
-        for block in self.selectedBlocks:
-            grid.SelectBlock(block.TopLeft, block.BottomRight, True)
-        # Each individually-selected cell is just a 1x1 block; restore it the same additive way.
-        for cell in self.selectedCells:
-            grid.SelectBlock(cell, cell, True)
+        nrows, ncols=grid.GetNumberRows(), grid.GetNumberCols()
+        for top, left, bottom, right in self.selectedBlocks:
+            if top >= nrows or left >= ncols:
+                continue
+            grid.SelectBlock(top, left, min(bottom, nrows-1), min(right, ncols-1), addToSelected=True)
 
 
     def Print(self, label: str):      # Selection
-        for block in self.selectedBlocks:
-            print(f"{label}: selected block({block.TopLeft}, {block.BottomRight})")
-        selected=self.selectedCols
-        print(f"{label}: selected cols: {selected}")
-        selected=self.selectedRows
-        print(f"{label}: selected rows: {selected}")
-        for cell in self.selectedCells:
-            print(f"{label}: selected cell({cell.x}, {cell.y})")
+        for top, left, bottom, right in self.selectedBlocks:
+            print(f"{label}: selected block(({top}, {left}), ({bottom}, {right}))")
 
 
 #================================================================
