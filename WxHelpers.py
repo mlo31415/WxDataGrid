@@ -198,8 +198,17 @@ class ProgressMessage(object):
             Log(f"ProgressMessage.Close(): could not destroy the ProgressDialog: {e}", isError=True)
 
         if self._parent is not None:
-            self._parent.SetFocus()
-            self._parent.Raise()
+            # Return focus/z-order to the parent, but DEFER it. This dialog is PD_APP_MODAL (it disables every
+            # window in the app); the re-enable triggered by Destroy() above has not completed yet, so calling
+            # SetFocus() on the still-disabled parent right here fails at the Win32 level ("SetFocus failed with
+            # error 0x57"). CallAfter runs it once the windows have been re-enabled (and skips it if the parent
+            # has since gone away or been hidden).
+            parent=self._parent
+            def _restoreParentFocus():
+                if parent and parent.IsShownOnScreen() and parent.IsEnabled():
+                    parent.SetFocus()
+                    parent.Raise()
+            wx.CallAfter(_restoreParentFocus)
 
 # class ProgressMsg(object):
 #     def __init__(self, parent: wx.TopLevelWindow | None, message: str, delay: float= 0.5) -> None:
