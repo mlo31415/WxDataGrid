@@ -423,11 +423,13 @@ class DataGrid():
     def __init__(self, grid: wx.grid.Grid, ColorSingleCellByValue: Callable[[int, int], None]|None=None):
         self._grid: wx.grid.Grid=grid
 
-        # Use classic (owner-drawn) column labels rather than the native header. wxWidgets 3.3 (wxPython 4.3)
-        # paints the selected column's NATIVE header in the system accent colour (bright blue on Windows),
-        # which is distracting; the classic labels don't. Harmless if the method is unavailable.
+        # Turn off "overlay selection", new in wxWidgets 3.3 (wxPython 4.3). It redraws the selection as a
+        # translucent overlay AND paints the selected cells' column/row headers in the system accent colour
+        # (bright blue on Windows) -- distracting, and a change from how these grids looked before the wx 4.3
+        # upgrade. Disabling it restores the classic selection drawing with no header highlight. (Note:
+        # SetUseNativeColLabels is unrelated and does NOT affect this.) Harmless if the method is unavailable.
         try:
-            self._grid.SetUseNativeColLabels(False)
+            self._grid.DisableOverlaySelection()
         except Exception:
             pass
 
