@@ -95,7 +95,7 @@ class ModalDialogManager:
 # Usage: with ModalDialogManager(ProgressMessage2, message) as pm:
 class ProgressMessage2(object):
     def __init__(self, *args, **kargs) -> None:
-        self._pm=ProgressMessage(args[0])
+        self._pm=ProgressMessage(None)     # (args[0] is the message, not the parent: the parent comes only from parent=)
         self._args=args[1:]
         self._kargs=kargs
         if "parent" in kargs:
@@ -140,14 +140,16 @@ class ProgressMessage(object):
     def __init__(self, parent: wx.TopLevelWindow|None=None) -> None:
         self._parent=parent
 
+    # The dialog is owned by the parent (if there is one). Unowned, closing it handed the focus to whatever other
+    # application was next in line (e.g. Chrome) -- the app's own windows were still disabled at that moment.
     @staticmethod
-    def _CreateDialog(s: str|None) -> wx.ProgressDialog:
+    def _CreateDialog(s: str|None, parent: wx.TopLevelWindow|None) -> wx.ProgressDialog:
         Log("ProgressMessage: creating the ProgressDialog")
-        return wx.ProgressDialog("progress", s, maximum=100, parent=None, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
+        return wx.ProgressDialog("progress", s, maximum=100, parent=parent, style=wx.PD_APP_MODAL|wx.PD_AUTO_HIDE)
 
     def Show(self, s: str|None, close: bool=False, delay: float=0) -> None:  # ConInstanceFramePage
         if ProgressMessage._progressMessageDlg is None:
-            ProgressMessage._progressMessageDlg=self._CreateDialog(s)
+            ProgressMessage._progressMessageDlg=self._CreateDialog(s, self._parent)
         Log(f"ProgressMessage.Show('{s}')")
         try:
             ProgressMessage._progressMessageDlg.Pulse(s)
@@ -155,7 +157,7 @@ class ProgressMessage(object):
             # The dialog has been destroyed out from under us (e.g. it was collected). Start a new one rather
             # than letting a RuntimeError about a deleted C++ object escape into the caller's event handler.
             Log(f"ProgressMessage.Show(): the ProgressDialog was gone ({e}); creating a new one")
-            ProgressMessage._progressMessageDlg=self._CreateDialog(s)
+            ProgressMessage._progressMessageDlg=self._CreateDialog(s, self._parent)
             ProgressMessage._progressMessageDlg.Pulse(s)
 
         if close:
