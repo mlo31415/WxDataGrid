@@ -198,6 +198,11 @@ class ProgressMessage(object):
             Log("ProgressMessage: destroyed the ProgressDialog")
         except Exception as e:
             Log(f"ProgressMessage.Close(): could not destroy the ProgressDialog: {e}", isError=True)
+        # Destroy() only queues the dialog for deletion when the app is next idle. Until then, a second progress dialog
+        # owned by the same parent crashes the app (an access violation): FanzinesEditor, 2026-11-24, downloading the list
+        # of fanzines then the master list of tags at startup. Yield so the deletion happens now. (SafeYield disables the
+        # app's windows meanwhile, so no user input is processed -- but timers and CallAfter callbacks can run.)
+        wx.SafeYield(None, True)
 
         if self._parent is not None:
             # Return focus/z-order to the parent, but DEFER it. This dialog is PD_APP_MODAL (it disables every
